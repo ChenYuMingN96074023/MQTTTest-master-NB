@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/chat_room_list_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#88CEFA"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="聊天室"
+            android:textSize="25sp" />
+
+        <Button
+            android:id="@+id/add_chat_room_btn"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="#000080"
+            android:text="+"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/addCRLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chat_room_list_title">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="8"
+            app:hintEnabled="false">
+
+            <android.support.design.widget.TextInputEditText
+                android:id="@+id/et_add_CR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="輸入想subscribe的主題" />
+        </android.support.design.widget.TextInputLayout>
+
+        <Button
+            android:id="@+id/addCRok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:onClick="addCRok"
+            android:text="確定" />
+
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/chat_room_list_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addCRLayout"></android.support.v7.widget.RecyclerView>
+
+</android.support.constraint.ConstraintLayout>
