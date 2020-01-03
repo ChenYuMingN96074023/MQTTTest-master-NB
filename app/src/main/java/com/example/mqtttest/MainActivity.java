@@ -2,28 +2,31 @@ package com.example.mqtttest;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
-import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.example.mqtttest.database.DBHelper_ChatMessages;
 import com.example.mqtttest.mqtt.MqttHelper;
-import com.example.mqtttest.recyclerMQTT.MQTTFunction;
+import com.example.mqtttest.recyclerChatRoom.MQTTAdapter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +37,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private MqttHelper mqtt;
     private EditText editText;
+    private String myClientId,myTopic;
+    private RecyclerView recyclerView_CR;
+    private DBHelper_ChatMessages dbHelper_chatMessages;
+    private ArrayList arrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,22 +49,46 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        SharedPreferences preferences = getSharedPreferences("testSharePreferences", MODE_PRIVATE);
+        myClientId = preferences.getString("clientID", "");
 
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        //String myClientId = "NCKU1";//寫死時的寫法
-        String myClientId = getIntent().getStringExtra("MY_CLIENT_ID");
-
-        if (myClientId != null) {
-
-            MQTTFunction mqttFunction = new MQTTFunction(this, recyclerView, myClientId);
-            mqtt = new MqttHelper(mqttFunction, "NCKU_TOPIC", myClientId, recyclerView);
-//            mqtt.startSubscribe();
-        }
+        myTopic = getIntent().getStringExtra("MY_TOPIC");
+        recyclerView_CR = findViewById(R.id.recyclerView_CR);
         editText = findViewById(R.id.editText);
+
+        if (myClientId != null && myTopic != null) {
+            mqtt = new MqttHelper(this, myTopic, myClientId, recyclerView_CR);
+        } else {
+            Toast.makeText(MainActivity.this,"fail \n ID:"+ myClientId + "Topic:"+ myTopic,Toast.LENGTH_LONG).show();
+        }
+
+        dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, myTopic,null,1);
+        arrayList = dbHelper_chatMessages.getRecSet(myTopic);
+        recyclerView_CR.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        recyclerView_CR.scrollToPosition(arrayList.size()-1);
+        recyclerView_CR.setAdapter(new MQTTAdapter(MainActivity.this,arrayList,myClientId));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(dbHelper_chatMessages==null){
+            dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, myTopic,null,1);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(dbHelper_chatMessages!=null){
+            dbHelper_chatMessages.close();
+            dbHelper_chatMessages = null;
+            Log.d("tag","closing table:"+myTopic);
+        }
     }
 
     public void buttonPublisher(View view) {
-        mqtt.startPublisher(editText.getText().toString(), TEXT);
+        mqtt.startPublish(myTopic, editText.getText().toString(), TEXT);
         editText.setText("");
     }
 
@@ -84,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
                             byte[] imageByte = byteArrayOutputStream.toByteArray();
                             String imgEncode = Base64.encodeToString(imageByte, Base64.DEFAULT);
-                            mqtt.startPublisher(imgEncode, PHOTO);
+                            mqtt.startPublish(myTopic, imgEncode, PHOTO);
                             Log.d(TAG, "photo encode :" + imgEncode);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
@@ -118,4 +149,5 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }

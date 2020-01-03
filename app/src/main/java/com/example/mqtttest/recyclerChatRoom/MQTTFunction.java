@@ -1,4 +1,4 @@
-package com.example.mqtttest.recyclerMQTT;
+package com.example.mqtttest.recyclerChatRoom;
 
 import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.example.mqtttest.MainActivity;
-import com.example.mqtttest.recyclerPhoto.PhotoBean;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ public class MQTTFunction {
     String myClientId;
     MQTTBean data;
     private final LinearLayoutManager layoutManager;
+//    private DBHelper_ChatMessages dbHelper_chatMessages = null;
 
     public MQTTFunction(Context context, RecyclerView recyclerView, String myClientId) {
         this.context = context;

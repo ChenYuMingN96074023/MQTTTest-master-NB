@@ -1,4 +1,4 @@
-package com.example.mqtttest.recyclerMQTT;
+package com.example.mqtttest.recyclerChatRoom;
 
 import android.content.Context;
 import android.content.Intent;
@@ -46,7 +46,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MQTTHolder mqttHolder, int i) {
-        Log.d("TAG", "onBindViewHolder: "+i);
+//        Log.d("TAG", "onBindViewHolder: "+i);
         switch (arrayList.get(i).type) {
             case MainActivity.TEXT:
                 mqttHolder.txMessage.setText(arrayList.get(i).getMessage());
@@ -62,10 +62,10 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
                 int photoArrayListItemNum = photoArrayList.size();
                 mqttHolder.messageImg.setTag(photoArrayListItemNum);
                 Log.d("TAG", "onBindViewHolderPHOTO: "+photoArrayListItemNum);
-                photoArrayList.add(new PhotoBean(decodeByte,arrayList.get(i).getId(), photoArrayListItemNum));
+                photoArrayList.add(new PhotoBean(decodeByte,arrayList.get(i).getClientID(), photoArrayListItemNum));
                 break;
         }
-        if (arrayList.get(i).getId().equals(myClientId)) {
+        if (arrayList.get(i).getClientID().equals(myClientId)) {
             mqttHolder.itemLayout.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
             mqttHolder.imgOtherUser.setVisibility(View.GONE);
             mqttHolder.imgUser.setVisibility(View.VISIBLE);

@@ -61,9 +61,20 @@ android:orientation="vertical" >
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
+                android:layout_weight="1"
                 android:text="你好啊"
                 android:textColor="#888888"
                 android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/crl_unread_messages_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#228B22"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="14dp"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

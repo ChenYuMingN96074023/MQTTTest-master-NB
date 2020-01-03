@@ -26,20 +26,11 @@
         android:id="@+id/btn_login"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:text="登錄"
-        android:textSize="20sp"
-        android:background="#AAAAAA"
         android:layout_below="@+id/et_password"
         android:layout_marginTop="50dp"
-        />
-
-    <Button
-        android:id="@+id/btn_test"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="只是測試用ㄉ"
-        android:textSize="20sp"
         android:background="#AAAAAA"
-        android:layout_below="@+id/btn_login"
-        android:layout_marginTop="50dp"/>
+        android:onClick="loginButton"
+        android:text="註冊並登錄"
+        android:textSize="20sp" />
+
 </RelativeLayout>

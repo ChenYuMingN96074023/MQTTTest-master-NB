@@ -1,17 +1,17 @@
-package com.example.mqtttest.recyclerMQTT;
+package com.example.mqtttest.recyclerChatRoom;
 
 
 public class MQTTBean {
     String message;
-    String id;
+    String clientID;
     int type;
 
     public MQTTBean() {
     }
 
-    public MQTTBean(String message, String id, int type) {
+    public MQTTBean(String message, String clientID, int type) {
         this.message = message;
-        this.id = id;
+        this.clientID = clientID;
         this.type = type;
     }
 
@@ -23,12 +23,12 @@ public class MQTTBean {
         this.message = message;
     }
 
-    public String getId() {
-        return id;
+    public String getClientID() {
+        return clientID;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setClientID(String id) {
+        this.clientID = id;
     }
 
     public int getType() {
