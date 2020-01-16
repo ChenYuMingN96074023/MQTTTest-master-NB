@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
-///////////測試push到github
+///////////測試push到github 6:50
     public void loginButton(View view){
         AlertDialog.Builder ad=new AlertDialog.Builder(LoginActivity.this);
         ad.setTitle("登入");
