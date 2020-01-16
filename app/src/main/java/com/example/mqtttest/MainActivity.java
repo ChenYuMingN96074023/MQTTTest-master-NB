@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.mqtttest.database.DBHelper_CRL;
 import com.example.mqtttest.database.DBHelper_ChatMessages;
 import com.example.mqtttest.mqtt.MqttHelper;
 import com.example.mqtttest.recyclerChatRoom.MQTTAdapter;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private String myClientId,myTopic;
     private RecyclerView recyclerView_CR;
     private DBHelper_ChatMessages dbHelper_chatMessages;
+    private DBHelper_CRL dbHelper_crl;
     private ArrayList arrayList = new ArrayList<>();
 
     @Override
@@ -61,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(MainActivity.this,"fail \n ID:"+ myClientId + "Topic:"+ myTopic,Toast.LENGTH_LONG).show();
         }
+
+        dbHelper_crl = new DBHelper_CRL(MainActivity.this, null,null,1);
+        dbHelper_crl.setUnreadMsgNum(myTopic, 0);//設未讀訊息為0
 
         dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, myTopic,null,1);
         arrayList = dbHelper_chatMessages.getRecSet(myTopic);
@@ -85,6 +90,13 @@ public class MainActivity extends AppCompatActivity {
             dbHelper_chatMessages = null;
             Log.d("tag","closing table:"+myTopic);
         }
+    }
+
+    @Override
+    public void onStop(){   /////////確認一下要不要加
+        super.onStop();
+        Log.d("tag", "finished MainActivity");
+        MainActivity.this.finish();
     }
 
     public void buttonPublisher(View view) {

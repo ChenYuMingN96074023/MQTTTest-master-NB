@@ -2,8 +2,10 @@ package com.example.mqtttest.recyclerChatRoomList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,12 +42,24 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
     }
 
     @Override
-    public void onBindViewHolder(@NonNull myViewHolder myViewHolder, final int i) {
+    public void onBindViewHolder(@NonNull final myViewHolder myViewHolder, final int i) {
         myViewHolder.topic.setText(arrayList.get(i).getTopic());
         myViewHolder.time.setText(arrayList.get(i).getTime());
         myViewHolder.message.setText(arrayList.get(i).getMessage());
+        myViewHolder.unread_msg_num.setText(Integer.toString(arrayList.get(i).getUnread_msg_num()));
 
-//        dbHelper_chatMessages = new DBHelper_ChatMessages(context, DB_NAME, arrayList.get(i).getTopic(), null, DB_ChatMessage_Version);//之後可以測試放onCreate
+//        myViewHolder.topic.setTypeface(myViewHolder.topic.getTypeface(), Typeface.BOLD);
+
+        if(arrayList.get(i).getUnread_msg_num() > 0){
+            myViewHolder.topic.setTypeface(myViewHolder.topic.getTypeface(), Typeface.BOLD);
+            myViewHolder.message.setTypeface(myViewHolder.message.getTypeface(), Typeface.BOLD);
+            myViewHolder.unread_msg_num.setVisibility(View.VISIBLE);
+        }else{
+            myViewHolder.topic.setTypeface(myViewHolder.topic.getTypeface(), Typeface.NORMAL);
+            myViewHolder.message.setTypeface(myViewHolder.message.getTypeface(), Typeface.NORMAL);
+            myViewHolder.unread_msg_num.setVisibility(View.GONE);
+        }
+
         myViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,7 +75,6 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
             @Override
             public boolean onLongClick(View v) {
                 Toast toast = Toast.makeText(context,"這是長按事件",Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.TOP,0,0);
                 toast.show();
                 return true;
             }
@@ -74,7 +87,7 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
     }
 
     public class myViewHolder extends RecyclerView.ViewHolder {
-        TextView topic,time, message;
+        TextView topic,time, message, unread_msg_num;
         ImageView icon;
 
         public myViewHolder(@NonNull View itemView) {
@@ -83,6 +96,7 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
             time = itemView.findViewById(R.id.crl_time);
             message = itemView.findViewById(R.id.crl_message);
             icon = itemView.findViewById(R.id.crl_icon);
+            unread_msg_num = itemView.findViewById(R.id.crl_unread_msg_num);
         }
     }
 

@@ -67,14 +67,14 @@ android:orientation="vertical" >
                 android:textSize="14dp" />
 
             <TextView
-                android:id="@+id/crl_unread_messages_number"
+                android:id="@+id/crl_unread_msg_num"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="#228B22"
                 android:text="0"
                 android:textColor="#FFFFFF"
                 android:textSize="14dp"
-                android:visibility="gone" />
+                android:visibility="visible" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

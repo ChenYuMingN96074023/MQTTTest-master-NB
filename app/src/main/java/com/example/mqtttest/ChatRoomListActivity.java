@@ -60,7 +60,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         myClientID = preferences.getString("clientID", "");
 
         if(myClientID != null){
-            mqttHelper = new MqttHelper(this, myClientID, chatRoomListRv);////這邊用的RecyclerView怪怪的
+            mqttHelper = new MqttHelper(this, myClientID, chatRoomListRv);
         }
     }
 
@@ -78,6 +78,11 @@ public class ChatRoomListActivity extends AppCompatActivity {
             dbHelper_CRL = new DBHelper_CRL(this, DB_CRItem_NAME,null, DB_CRItem_VERSION);
         }
 
+        dbHelper_CRL = new DBHelper_CRL(this, DB_CRItem_NAME,null, DB_CRItem_VERSION);
+
+        //更新聊天列表畫面
+        arrayListCRList = dbHelper_CRL.getRecSet();
+        chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
     }
 
     @Override
@@ -94,7 +99,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         String topic = et_add_CR.getText().toString();
 
         //以下為設定CRLItem
-        dbHelper_CRL.addRec(new CRListBean(topic, "12:20", "測試SQL", 3));
+        dbHelper_CRL.addRec(new CRListBean(topic, "12:20", "null", 3, 0));
         arrayListCRList = dbHelper_CRL.getRecSet();
         chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
         //以下為Subscribe，並建立SQLite，並發布消息
@@ -103,7 +108,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         dbHelper_chatMessages.createTable(topic);
         dbHelper_chatMessages.close();
         dbHelper_chatMessages = null;
-//        mqttHelper.startPublish(topic, myClientID + "已加入聊天室", 1);
+        mqttHelper.startPublish(topic, myClientID + "已加入聊天室", 1);
         //以下為設定畫面
         et_add_CR.setText("");
         addCRLayout.setVisibility(View.GONE);

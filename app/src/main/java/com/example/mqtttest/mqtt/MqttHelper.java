@@ -1,6 +1,7 @@
 package com.example.mqtttest.mqtt;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,6 +18,8 @@ import com.example.mqtttest.database.DBHelper_CRL;
 import com.example.mqtttest.database.DBHelper_ChatMessages;
 import com.example.mqtttest.recyclerChatRoom.MQTTAdapter;
 import com.example.mqtttest.recyclerChatRoom.MQTTBean;
+import com.example.mqtttest.recyclerChatRoomList.CRListAdapter;
+import com.example.mqtttest.recyclerChatRoomList.CRListBean;
 import com.google.gson.Gson;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -43,45 +46,12 @@ public class MqttHelper {
 
     Context context;
     ArrayList<MQTTBean> arrayList = new ArrayList<>();
+    ArrayList<CRListBean> arrayList_CRLItem = new ArrayList<>();
     MQTTBean data;
     private LinearLayoutManager layoutManager;
 
     private DBHelper_ChatMessages dbHelper_chatMessages;
     private DBHelper_CRL dbHelper_CRL;
-
-    public MqttHelper(final TextView textView)//default使用預設的變數值
-    {
-        try {
-            client = new MqttClient(mqttHost, "NCKU1", new MemoryPersistence());
-            options = new MqttConnectOptions();
-            options.setMqttVersion(version);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(10);
-            options.setKeepAliveInterval(20);
-            client.setCallback(new MqttCallback() {
-                @Override
-                public void connectionLost(Throwable cause) {
-                    Log.d(TAG, "connectionLost: " + cause.getMessage());
-
-                }
-
-                @Override
-                public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    Log.d(TAG, "messageArrived: topic: "+ topic);
-                    Log.d(TAG, "messageArrived: message: "+ new String(message.getPayload()));
-                    textView.setText( new String(message.getPayload()));
-                }
-
-                @Override
-                public void deliveryComplete(IMqttDeliveryToken token) {
-                    Log.d(TAG, "deliveryComplete: up date state --- " + token.isComplete());
-                }
-            });
-            client.connect(options);
-        } catch (MqttException e) {
-            e.printStackTrace();
-        }
-    }
 
     public MqttHelper(Context context, String myTopic, String myClientId, RecyclerView recyclerView){ //給CR用
         this.context = context;
@@ -134,14 +104,6 @@ public class MqttHelper {
         }
 
         catch (MqttException e) {
-//            e.printStackTrace();
-//            Log.d(TAG, "MqttHelper: "+e.getMessage());
-//            Snackbar.make(recyclerView,e.getMessage(),Snackbar.LENGTH_INDEFINITE).setAction(R.string.click_to_reconnect, new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    connectMQTTServer();
-//                }
-//            }).show();
             reconnectMQTTServer(e);
         }
     }
@@ -164,13 +126,6 @@ public class MqttHelper {
             client.subscribe(topic1, Qos);
             Snackbar.make(recyclerView,"Start subscribe to " + subTopic ,Snackbar.LENGTH_SHORT).show();
         } catch (MqttException e) {
-//            e.printStackTrace();
-//            Snackbar.make(recyclerView,e.getMessage(),Snackbar.LENGTH_INDEFINITE).setAction(R.string.click_to_reconnect, new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    connectMQTTServer();
-//                }
-//            }).show();
             reconnectMQTTServer(e);
         }
     }
@@ -213,21 +168,25 @@ public class MqttHelper {
 
         try { //如果符合格式(是由這個架構發出的訊息)
             data = new Gson().fromJson(messagePayload, MQTTBean.class);
-        }
-        catch (Exception e){//如果不符合格式
+        } catch (Exception e){//如果不符合格式
             Log.d("TAG", "addData: " + e.getMessage());
             Toast.makeText(context, "偵測到不合法的訊息!!", Toast.LENGTH_LONG).show();
             data = new MQTTBean("illegal message!", "", -1);
         }
 
         dbHelper_chatMessages.addRec(data, addDataTopic);
-        dbHelper_CRL.refreshMessage(addDataTopic, data.getMessage());
+        dbHelper_CRL.refreshMessage(addDataTopic, data.getMessage());//更新聊天列表物件的信息
+        dbHelper_CRL.setUnreadMsgNum(addDataTopic, dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic)+1);//聊天列表物件的未讀訊息+1
 
-        if (addDataTopic.equals(myTopic)){    //如果傳入訊息跟所在聊天室相同
+        if(myTopic == null){//在CRL activity
+            arrayList_CRLItem = dbHelper_CRL.getRecSet();
+            recyclerView.setAdapter(new CRListAdapter(context, arrayList_CRLItem));
+            Log.d(TAG, "確實收到訊息");
+        }else if (addDataTopic.equals(myTopic)){    //在聊天室中，傳入訊息topic跟所在聊天室topic相同
             arrayList = dbHelper_chatMessages.getRecSet(myTopic);
             layoutManager.scrollToPosition(arrayList.size()-1);
-            recyclerView.setAdapter(new MQTTAdapter(context,arrayList,myClientId));
-        }else {                               //如果不相同就跳通知
+            recyclerView.setAdapter(new MQTTAdapter(context, arrayList, myClientId));
+        }else {                                     //在聊天室中，傳入訊息topic跟所在聊天室topic不相同
             Toast toast = Toast.makeText(context, addDataTopic + "中有新訊息:" + data.getMessage(), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 0);
             toast.show();
