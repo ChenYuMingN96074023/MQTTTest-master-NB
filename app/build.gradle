@@ -12,11 +12,20 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     buildToolsVersion = '28.0.3'
+    //以下compileOptions packagingOptions為HiveMQ新增
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
+    }
 }
 
 dependencies {
@@ -32,4 +41,5 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'com.android.support:design:28.0.0'
     implementation 'org.jetbrains:annotations-java5:15.0'
+//    implementation 'com.hivemq:hivemq-mqtt-client:1.1.3'//會衝突到?
 }

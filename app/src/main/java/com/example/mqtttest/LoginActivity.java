@@ -35,9 +35,8 @@ public class LoginActivity extends AppCompatActivity {
             login();
 //            Log.d(TAG, "automatically login, clientID:" + clientID);
         }
-
     }
-///////////測試push到github 6:50
+///////////最新版本~2020/02/05 10:45
     public void loginButton(View view){
         AlertDialog.Builder ad=new AlertDialog.Builder(LoginActivity.this);
         ad.setTitle("登入");
@@ -56,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
         ad.show();//顯示對話框
-//        login();
+
     }
     private void login(){
         Intent loginIntent = new Intent(LoginActivity.this, ChatRoomListActivity.class);

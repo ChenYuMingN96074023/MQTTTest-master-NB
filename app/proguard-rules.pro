@@ -19,3 +19,5 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keepclassmembernames class io.netty.** { *; }#以下兩行為HiveMQ新增
+-keepclassmembernames class org.jctools.** { *; }

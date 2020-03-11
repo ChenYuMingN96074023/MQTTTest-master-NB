@@ -77,6 +77,8 @@ public class MqttHelper {
             options.setCleanSession(false);
             options.setConnectionTimeout(30);
             options.setKeepAliveInterval(20);
+//            options.setUserName(myClientId);
+//            options.setPassword("testpsd123".toCharArray());
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
@@ -175,8 +177,12 @@ public class MqttHelper {
         }
 
         dbHelper_chatMessages.addRec(data, addDataTopic);
-        dbHelper_CRL.refreshMessage(addDataTopic, data.getMessage());//更新聊天列表物件的信息
-        dbHelper_CRL.setUnreadMsgNum(addDataTopic, dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic)+1);//聊天列表物件的未讀訊息+1
+//        dbHelper_CRL.refreshMessage(addDataTopic, data.getMessage());//更新聊天列表物件的信息
+//        dbHelper_CRL.setUnreadMsgNum(addDataTopic, dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic)+1);//聊天列表物件的未讀訊息+1
+
+        int unreadMsgNum = dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic);//更新聊天列表物件的信息
+        dbHelper_CRL.deleteRec(addDataTopic);
+        dbHelper_CRL.addRec(new CRListBean(addDataTopic,"testtime", data.getMessage(), 1, unreadMsgNum+1));
 
         if(myTopic == null){//在CRL activity
             arrayList_CRLItem = dbHelper_CRL.getRecSet();

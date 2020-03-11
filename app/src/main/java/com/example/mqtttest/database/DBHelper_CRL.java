@@ -59,10 +59,11 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         String sql = "SELECT*FROM " + _TableName;
         Cursor recSet = db.rawQuery(sql,null);
         ArrayList<CRListBean> recAry = new ArrayList<CRListBean>();
-//        int columnCount = recSet.getColumnCount();
-        while (recSet.moveToNext()){
-            recAry.add(new CRListBean(recSet.getString(TOPIC), recSet.getString(TIME),
-                    recSet.getString(MESSAGE), recSet.getInt(IMG_ID), recSet.getInt(UNREAD_MSG_NUM)));
+        if (recSet.moveToLast()) { //由後往前排列
+            do {
+                recAry.add(new CRListBean(recSet.getString(TOPIC), recSet.getString(TIME),
+                        recSet.getString(MESSAGE), recSet.getInt(IMG_ID), recSet.getInt(UNREAD_MSG_NUM)));
+            } while (recSet.moveToPrevious());
         }
         recSet.close();
         db.close();
