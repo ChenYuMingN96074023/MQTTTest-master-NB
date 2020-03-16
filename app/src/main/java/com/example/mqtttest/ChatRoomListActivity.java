@@ -96,23 +96,27 @@ public class ChatRoomListActivity extends AppCompatActivity {
 
     public void addCRok(View view) {//按鈕 "確定" ，新增聊天室
         TextInputEditText et_add_CR = findViewById(R.id.et_add_CR);
-        String topic = et_add_CR.getText().toString();
 
-        //以下為設定CRLItem
-        dbHelper_CRL.addRec(new CRListBean(topic, "12:20", "null", 3, 0));
-        arrayListCRList = dbHelper_CRL.getRecSet();
-        chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
-        //以下為Subscribe，並建立SQLite，並發布消息
-        mqttHelper.startSubscribe(topic);
-        dbHelper_chatMessages = new DBHelper_ChatMessages(this, null, topic, null, 1);//思考該建立在哪
-        dbHelper_chatMessages.createTable(topic);
-        dbHelper_chatMessages.close();
-        dbHelper_chatMessages = null;
-        mqttHelper.startPublish(topic, myClientID + "已加入聊天室", 1);
-        //以下為設定畫面
-        et_add_CR.setText("");
-        addCRLayout.setVisibility(View.GONE);
-        btn_addCR.setText("+");
+        try{
+            String topic = et_add_CR.getText().toString();
+            //以下為Subscribe，並建立SQLite，並發布消息
+            dbHelper_chatMessages = new DBHelper_ChatMessages(this, null, topic, null, 1);/////思考該建立在哪
+            dbHelper_chatMessages.createTable(topic);
+            dbHelper_chatMessages.close();
+            dbHelper_chatMessages = null;
+            mqttHelper.startSubscribe(topic);
+            mqttHelper.startPublish(topic, myClientID + "已加入聊天室", 1);
+            //以下為設定CRLItem
+            dbHelper_CRL.addRec(new CRListBean(topic, "null", "null", 3, 0));
+            arrayListCRList = dbHelper_CRL.getRecSet();
+            chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
+            //以下為設定畫面
+            et_add_CR.setText("");
+            addCRLayout.setVisibility(View.GONE);
+            btn_addCR.setText("+");
+        }catch (Exception e){
+            Toast.makeText(ChatRoomListActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void add_chat_room_btn(View view){//按鈕 "+-"
@@ -130,7 +134,8 @@ public class ChatRoomListActivity extends AppCompatActivity {
         AlertDialog.Builder ad=new AlertDialog.Builder(ChatRoomListActivity.this);
         ad.setTitle("登出");
         ad.setMessage("確定要登出嗎?\n" +
-                "不過這個功能還沒完整，可能會有未知的錯誤>.<|||");
+                "不過這個功能還沒完整，可能會有未知的錯誤>.<|||\n" +
+                "若要完整登出並刪除紀錄，建議登出後再解除安裝此程式\n");
         ad.setPositiveButton("是", new DialogInterface.OnClickListener() {//登出按鈕
             public void onClick(DialogInterface dialog, int i) {
                 // TODO Auto-generated method stub

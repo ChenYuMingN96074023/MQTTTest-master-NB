@@ -44,7 +44,7 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues rec = new ContentValues();
         rec.put("topic", bean.getTopic());
-        rec.put("time", bean.getTime());
+        rec.put("Time", bean.getTime());
         rec.put("message", bean.getMessage());
         rec.put("img_id", bean.getImg_id());
         rec.put("unread_msg_num", bean.getUnread_msg_num());
@@ -104,35 +104,14 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         db.close();
     }
 
-//    public int searchTopic(String topic)//搜尋資料庫裡面是否有該topic的資料，有的話return所在的欄位數
-//    {
-//        SQLiteDatabase db = getReadableDatabase();
-//        String sql = "SELECT*FROM " + _TableName + " WHERE topic LIKE ?";
-//        String[] args = {"%" + topic + "%"};
-//        Cursor recSet = db.rawQuery(sql, args);
-//        int columnCount = recSet.getColumnCount();
-//        return columnCount;
-//    }
-
-    public void refreshMessage(String topic, String latestMessage)//更新聊天室列表物件的訊息/////////之後要再做時間
+    public int searchTopic(String topic)//搜尋資料庫裡面是否有該topic的資料，有的話return所在的欄位數
     {
-        SQLiteDatabase db = getWritableDatabase();
-//        try { ////沒問題可以刪掉try catch
-//        }
-//        catch (Exception e){
-//            Log.d(TAG, "refresh message fail");
-//        }
-//
-        ContentValues values = new ContentValues();
-//            values.put("topic", topic);
-        values.put("message", latestMessage);
-//            values.put("time", "00:00");
-//            values.put("img_id", 1);
-//            values.put("unread_msg_num", 99);
-        db.update(_TableName, values, "topic ='"+topic+"'",null);
-        Log.d(TAG, "refresh message on CRL item success");
-
-            db.close();
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "SELECT*FROM " + _TableName + " WHERE topic LIKE ?";
+        String[] args = {"%" + topic + "%"};
+        Cursor recSet = db.rawQuery(sql, args);
+        int columnCount = recSet.getColumnCount();
+        return columnCount;
     }
 
     public int getUNREAD_MSG_NUM(String topic)//傳入聊天列表topic，回傳該聊天室的未讀訊息數

@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
 //            Log.d(TAG, "automatically login, clientID:" + clientID);
         }
     }
-///////////最新版本~2020/02/05 10:45
+
     public void loginButton(View view){
         AlertDialog.Builder ad=new AlertDialog.Builder(LoginActivity.this);
         ad.setTitle("登入");
@@ -45,8 +45,11 @@ public class LoginActivity extends AppCompatActivity {
                 "確認登入?");
         ad.setPositiveButton("是", new DialogInterface.OnClickListener() {//登入按鈕
             public void onClick(DialogInterface dialog, int i) {
-                // TODO Auto-generated method stub
-                login();
+                if(EtAccount.length() != 0) { //在這裡設限制，若空白則不給登入//////////////////////
+                    login();
+                }else {
+                    Toast.makeText(LoginActivity.this, "帳號不可空白", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         ad.setNegativeButton("否",new DialogInterface.OnClickListener() {

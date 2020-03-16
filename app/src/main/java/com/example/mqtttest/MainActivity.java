@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onStop(){   /////////確認一下要不要加
+    public void onStop(){
         super.onStop();
         Log.d("tag", "finished MainActivity");
         MainActivity.this.finish();

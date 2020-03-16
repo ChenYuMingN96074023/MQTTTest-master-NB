@@ -78,6 +78,9 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         mqttHolder.imgOtherUser.setColorFilter(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
         mqttHolder.imgUser.setColorFilter(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
 
+        //顯示傳送時間
+        mqttHolder.msgPubTime.setText(arrayList.get(i).getTime());
+
         mqttHolder.txMessage.setOnClickListener(new View.OnClickListener() {//開啟/收合該則訊息的資訊
             @Override
             public void onClick(View v) {
@@ -95,8 +98,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         mqttHolder.imgOtherUser.setOnClickListener(new View.OnClickListener() {//顯示該訊息傳送者的資訊(尚未開發)
             @Override
             public void onClick(View v) {
-//                Toast.makeText(context, "預計要顯示這個使用者的資訊，不過功能還沒實作>.<|||", Toast.LENGTH_SHORT).show();
-                test();
+                Toast.makeText(context, "預計要顯示這個使用者的資訊，不過功能還沒實作>.<|||", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -124,14 +126,15 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
 
     public class MQTTHolder extends RecyclerView.ViewHolder {
         LinearLayout itemLayout, msgInfoLayout;
-        TextView txMessage, msgOtherUserID, msgUserID;
+        TextView txMessage, msgOtherUserID, msgUserID, msgPubTime;
         ImageView imgUser, imgOtherUser, messageImg;
 
         public MQTTHolder(@NonNull View itemView) {
             super(itemView);
+            txMessage = itemView.findViewById(R.id.chatroomMessage);
             msgOtherUserID = itemView.findViewById(R.id.msgOtherUserID);
             msgUserID = itemView.findViewById(R.id.msgUserID);
-            txMessage = itemView.findViewById(R.id.chatroomMessage);
+            msgPubTime = itemView.findViewById(R.id.msgPublishTime);
             messageImg = itemView.findViewById(R.id.chatroomImg);
             imgUser = itemView.findViewById(R.id.chatroomUser);
             imgOtherUser = itemView.findViewById(R.id.chatroomOtherUser);
@@ -152,20 +155,13 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         }
     };
 
-    private int setImgColor(String clientID){
+    private int setImgColor(String clientID){ //藉由產生一數，改變android小人圖片的顏色
         char[] chars = clientID.toCharArray();
         int seed = 0;
         for (int i = 0; i < chars.length; i++) {
             seed = seed + (int) chars[i];
         }
-//        Toast.makeText(context, "種子為" + seed, Toast.LENGTH_SHORT).show();
         return seed;
     }
 
-    private void test(){
-        SimpleDateFormat dff = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dff.setTimeZone(TimeZone.getTimeZone("GMT 08"));
-        String ee = dff.format(new Date());
-        Toast.makeText(context, "ee= "+ee, Toast.LENGTH_SHORT).show();
-    }
 }

@@ -1,7 +1,6 @@
 package com.example.mqtttest.mqtt;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mqtttest.MainActivity;
@@ -20,6 +18,7 @@ import com.example.mqtttest.recyclerChatRoom.MQTTAdapter;
 import com.example.mqtttest.recyclerChatRoom.MQTTBean;
 import com.example.mqtttest.recyclerChatRoomList.CRListAdapter;
 import com.example.mqtttest.recyclerChatRoomList.CRListBean;
+import com.example.mqtttest.timeHelper.TimeGenerateHelper;
 import com.google.gson.Gson;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -52,6 +51,7 @@ public class MqttHelper {
 
     private DBHelper_ChatMessages dbHelper_chatMessages;
     private DBHelper_CRL dbHelper_CRL;
+    private TimeGenerateHelper timeGenerateHelper = new TimeGenerateHelper();
 
     public MqttHelper(Context context, String myTopic, String myClientId, RecyclerView recyclerView){ //給CR用
         this.context = context;
@@ -138,11 +138,11 @@ public class MqttHelper {
             switch (type) {
                 case MainActivity.TEXT:
                     //send text
-                    data = new MQTTBean(message, myClientId, MainActivity.TEXT);
+                    data = new MQTTBean(message, myClientId, timeGenerateHelper.getTime(), MainActivity.TEXT);
                     break;
                 case MainActivity.PHOTO:
                     //send image with base64
-                    data = new MQTTBean(message,myClientId,MainActivity.PHOTO);
+                    data = new MQTTBean(message,myClientId, timeGenerateHelper.getTime(),MainActivity.PHOTO);
                     break;
             }
             MqttMessage mqttMessage = new MqttMessage(new Gson().toJson(data).getBytes());
@@ -150,18 +150,11 @@ public class MqttHelper {
 
             client.publish(pubTopic, mqttMessage);
         } catch (MqttException e) {
-//            e.printStackTrace();
-//            Snackbar.make(recyclerView,"fail up ("+e.getMessage()+")",Snackbar.LENGTH_LONG).setAction(R.string.click_to_reconnect, new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    connectMQTTServer();
-//                }
-//            }).show();
             reconnectMQTTServer(e);
         }
     }
 
-    public void addData(String addDataTopic,String messagePayload){
+    private void addData(String addDataTopic,String messagePayload){
         layoutManager = new LinearLayoutManager(context);
         this.recyclerView.setLayoutManager(layoutManager);
 
@@ -173,21 +166,18 @@ public class MqttHelper {
         } catch (Exception e){//如果不符合格式
             Log.d("TAG", "addData: " + e.getMessage());
             Toast.makeText(context, "偵測到不合法的訊息!!", Toast.LENGTH_LONG).show();
-            data = new MQTTBean("illegal message!", "", -1);
+            data = new MQTTBean("illegal message!", "", "2000/01/01 00:00:00", -1);
         }
 
-        dbHelper_chatMessages.addRec(data, addDataTopic);
-//        dbHelper_CRL.refreshMessage(addDataTopic, data.getMessage());//更新聊天列表物件的信息
-//        dbHelper_CRL.setUnreadMsgNum(addDataTopic, dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic)+1);//聊天列表物件的未讀訊息+1
-
-        int unreadMsgNum = dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic);//更新聊天列表物件的信息
+        dbHelper_chatMessages.addRec(data, addDataTopic);//更新聊天室訊息
+        //以下更新聊天列表物件的信息
+        int unreadMsgNum = dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic);
         dbHelper_CRL.deleteRec(addDataTopic);
-        dbHelper_CRL.addRec(new CRListBean(addDataTopic,"testtime", data.getMessage(), 1, unreadMsgNum+1));
+        dbHelper_CRL.addRec(new CRListBean(addDataTopic, timeGenerateHelper.formatTheTime(data.getTime()), data.getMessage(), 1, unreadMsgNum+1));
 
-        if(myTopic == null){//在CRL activity
+        if(myTopic == null){                         //在CRL activity
             arrayList_CRLItem = dbHelper_CRL.getRecSet();
             recyclerView.setAdapter(new CRListAdapter(context, arrayList_CRLItem));
-            Log.d(TAG, "確實收到訊息");
         }else if (addDataTopic.equals(myTopic)){    //在聊天室中，傳入訊息topic跟所在聊天室topic相同
             arrayList = dbHelper_chatMessages.getRecSet(myTopic);
             layoutManager.scrollToPosition(arrayList.size()-1);

@@ -25,12 +25,6 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-//        String crT_CRItem = "CREATE TABLE IF NOT EXISTS " + tableName +"( " +
-//            "message VARCHAR ," +
-//            "clientID VARCHAR(50),"+   //這裡的50只是暫時亂設定的
-//            "type INTEGER);";
-//        db.execSQL(crT_CRItem);
-//        Log.d(TAG,"created table:"+tableName);
     }
 
     @Override
@@ -44,7 +38,8 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         String crT_CRItem = "CREATE TABLE IF NOT EXISTS " + tableName +"( " +
                 "message VARCHAR ," +
-                "clientID VARCHAR(50),"+   //////這裡的50只是暫時亂設定的
+                "clientID VARCHAR(50),"+
+                "time VARCHAR," + //////這裡的50只是暫時亂設定的
                 "type INTEGER);";
         db.execSQL(crT_CRItem);
         Log.d(TAG,"created table:" + tableName);
@@ -57,6 +52,7 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
         ContentValues rec = new ContentValues();
         rec.put("message",bean.getMessage());
         rec.put("clientID",bean.getClientID());
+        rec.put("Time", bean.getTime());
         rec.put("type",bean.getType());
         long rowID = db.insert(tableName, null,rec);
         db.close();
@@ -71,11 +67,17 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
         ArrayList<MQTTBean> recAry = new ArrayList<MQTTBean>();
         int columnCount = recSet.getColumnCount();
         while (recSet.moveToNext()){
-            recAry.add(new MQTTBean(recSet.getString(0), recSet.getString(1), recSet.getInt(2)));//////這邊先寫死
+            recAry.add(new MQTTBean(recSet.getString(0), recSet.getString(1), recSet.getString(2), recSet.getInt(3)));//////這邊先寫死
         }
         recSet.close();
         db.close();
         return recAry;
     }
 
+    public void deleteTable(String tableName) {//刪除一個table
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "DELETE FROM " + tableName + ";";
+        db.execSQL(sql);
+        db.close();
+    }
 }
