@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TextInputEditText;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 public class ChatRoomListActivity extends AppCompatActivity {
 
     public RecyclerView chatRoomListRv;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private ArrayList arrayListCRList = new ArrayList<>();
     private Button btn_addCR;
     private Button btn_logout;
@@ -56,6 +58,15 @@ public class ChatRoomListActivity extends AppCompatActivity {
         arrayListCRList = dbHelper_CRL.getRecSet();
         chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() { //上滑刷新
+            @Override
+            public void onRefresh() {
+                arrayListCRList = dbHelper_CRL.getRecSet();
+                chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         SharedPreferences preferences = getSharedPreferences("testSharePreferences", MODE_PRIVATE);
         myClientID = preferences.getString("clientID", "");
 
@@ -69,6 +80,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         btn_addCR = findViewById(R.id.add_chat_room_btn);
         btn_logout = findViewById(R.id.btn_logout);
         chatRoomListRv = findViewById(R.id.chat_room_list_recyclerview);
+        swipeRefreshLayout = findViewById(R.id.swipeRefreshLayout);
     }
 
     @Override

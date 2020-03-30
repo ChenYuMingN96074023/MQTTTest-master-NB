@@ -54,7 +54,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
     @Override
     public void onBindViewHolder(@NonNull MQTTHolder mqttHolder, int i) {
 //        Log.d("TAG", "onBindViewHolder: "+i);
-        switch (arrayList.get(i).type) {
+        switch (arrayList.get(i).type) { //訊息是圖片檔or文字
             case MainActivity.TEXT:
                 mqttHolder.txMessage.setText(arrayList.get(i).getMessage());
                 mqttHolder.messageImg.setVisibility(View.GONE);
@@ -102,14 +102,14 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
             }
         });
 
-        if (arrayList.get(i).getClientID().equals(myClientId)) {
+        if (arrayList.get(i).getClientID().equals(myClientId)) { //如果這則訊息就是使用者傳送的
             mqttHolder.itemLayout.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
             mqttHolder.imgOtherUser.setVisibility(View.GONE);
             mqttHolder.imgUser.setVisibility(View.VISIBLE);
             mqttHolder.msgUserID.setText(arrayList.get(i).clientID);
             mqttHolder.msgOtherUserID.setVisibility(View.INVISIBLE);
             mqttHolder.msgUserID.setVisibility(View.VISIBLE);
-        } else {
+        } else {                                                 //如果這則訊息是由其他人傳送
             mqttHolder.itemLayout.setGravity(Gravity.LEFT | Gravity.CENTER_VERTICAL);
             mqttHolder.imgOtherUser.setVisibility(View.VISIBLE);
             mqttHolder.imgUser.setVisibility(View.GONE);

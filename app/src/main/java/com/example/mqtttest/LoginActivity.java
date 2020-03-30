@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                 if(EtAccount.length() != 0) { //在這裡設限制，若空白則不給登入//////////////////////
                     login();
                 }else {
-                    Toast.makeText(LoginActivity.this, "帳號不可空白", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "用戶名不可空白", Toast.LENGTH_SHORT).show();
                 }
             }
         });

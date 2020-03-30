@@ -43,13 +43,13 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
 
     @Override
     public void onBindViewHolder(@NonNull final myViewHolder myViewHolder, final int i) {
+        //以下設定列表物件的訊息顯示
         myViewHolder.topic.setText(arrayList.get(i).getTopic());
         myViewHolder.time.setText(arrayList.get(i).getTime());
         myViewHolder.message.setText(arrayList.get(i).getMessage());
         myViewHolder.unread_msg_num.setText(Integer.toString(arrayList.get(i).getUnread_msg_num()));
 
-//        myViewHolder.topic.setTypeface(myViewHolder.topic.getTypeface(), Typeface.BOLD);
-
+        //以下設定未讀訊息時的呈現
         if(arrayList.get(i).getUnread_msg_num() > 0){
             myViewHolder.topic.setTypeface(myViewHolder.topic.getTypeface(), Typeface.BOLD);
             myViewHolder.message.setTypeface(myViewHolder.message.getTypeface(), Typeface.BOLD);
@@ -60,7 +60,7 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
             myViewHolder.unread_msg_num.setVisibility(View.GONE);
         }
 
-        myViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+        myViewHolder.itemView.setOnClickListener(new View.OnClickListener() { //點擊聊天列表進入聊天室
             @Override
             public void onClick(View v) {
                 Intent to_cr_intent = new Intent(context, MainActivity.class);

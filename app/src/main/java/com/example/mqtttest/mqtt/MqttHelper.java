@@ -39,6 +39,8 @@ public class MqttHelper {
     private static MqttClient client;
     private int version = MqttConnectOptions.MQTT_VERSION_3_1_1;
     private final String mqttHost ="tcp://140.116.226.96:1883";
+    private String userName = "user1";
+    private String password = "psd";
     private String myTopic;
     private String myClientId;
     Handler handler = new Handler();
@@ -77,8 +79,8 @@ public class MqttHelper {
             options.setCleanSession(false);
             options.setConnectionTimeout(30);
             options.setKeepAliveInterval(20);
-//            options.setUserName(myClientId);
-//            options.setPassword("testpsd123".toCharArray());
+            options.setUserName(userName);
+            options.setPassword(password.toCharArray());
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
@@ -169,7 +171,7 @@ public class MqttHelper {
             data = new MQTTBean("illegal message!", "", "2000/01/01 00:00:00", -1);
         }
 
-        dbHelper_chatMessages.addRec(data, addDataTopic);//更新聊天室訊息
+        dbHelper_chatMessages.addRec(data, addDataTopic);//新加這筆訊息至聊天室
         //以下更新聊天列表物件的信息
         int unreadMsgNum = dbHelper_CRL.getUNREAD_MSG_NUM(addDataTopic);
         dbHelper_CRL.deleteRec(addDataTopic);
@@ -195,6 +197,8 @@ public class MqttHelper {
             options = new MqttConnectOptions();
             options.setMqttVersion(version);
             options.setCleanSession(true);
+            options.setUserName(userName);
+            options.setPassword(password.toCharArray());
             client.connect(options);
             Log.d(TAG,"clean session OK,clientID:" + myClientId);
             client.disconnect();
