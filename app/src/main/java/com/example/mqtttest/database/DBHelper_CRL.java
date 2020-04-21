@@ -145,7 +145,7 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put("unread_msg_num", unreadMsgNum);
         db.update(_TableName, values, "topic ='"+topic+"'",null);
-        Log.d(TAG, "set UnreadMsgNum success");
+//        Log.d(TAG, "set UnreadMsgNum success");
     }
 }
 

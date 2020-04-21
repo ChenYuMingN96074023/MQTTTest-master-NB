@@ -93,10 +93,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onStop(){
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         Log.d("tag", "finished MainActivity");
         MainActivity.this.finish();
+
     }
 
     public void buttonPublisher(View view) {
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void imgPublisher(View view) {
         Intent imgIntent = new Intent();
+        Log.d(TAG,"Photo0");
         imgIntent.setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(imgIntent, INTENT_GET_IMAGE);
     }
@@ -115,8 +117,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG,"Photo1");
         switch (requestCode) {
             case INTENT_GET_IMAGE:
+                Log.d(TAG,"Photo2");
                 if (resultCode == RESULT_OK) {
                     if (data != null) {
                         Uri uri = data.getData();
@@ -124,13 +128,14 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             Bitmap bitmap = BitmapFactory.decodeStream(cr.openInputStream(uri));
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);/////////////////
                             byte[] imageByte = byteArrayOutputStream.toByteArray();
                             String imgEncode = Base64.encodeToString(imageByte, Base64.DEFAULT);
                             mqtt.startPublish(myTopic, imgEncode, PHOTO);
                             Log.d(TAG, "photo encode :" + imgEncode);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
+                            Log.d(TAG,"Error msg from photo "+e.getMessage());
                         }
                     }
                 }

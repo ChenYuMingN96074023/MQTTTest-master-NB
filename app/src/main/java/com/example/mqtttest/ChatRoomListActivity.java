@@ -95,6 +95,9 @@ public class ChatRoomListActivity extends AppCompatActivity {
         //更新聊天列表畫面
         arrayListCRList = dbHelper_CRL.getRecSet();
         chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
+
+        //重連線
+        mqttHelper = new MqttHelper(this, myClientID, chatRoomListRv);
     }
 
     @Override

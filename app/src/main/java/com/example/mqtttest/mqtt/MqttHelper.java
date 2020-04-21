@@ -39,7 +39,7 @@ public class MqttHelper {
     private static MqttClient client;
     private int version = MqttConnectOptions.MQTT_VERSION_3_1_1;
     private final String mqttHost ="tcp://140.116.226.96:1883";
-    private String userName = "user1";
+    private String userName = "normal-user";
     private String password = "psd";
     private String myTopic;
     private String myClientId;

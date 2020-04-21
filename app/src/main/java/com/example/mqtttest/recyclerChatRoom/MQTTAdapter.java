@@ -66,10 +66,12 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(decodeByte,0,decodeByte.length);
                 mqttHolder.messageImg.setImageBitmap(bitmap);
                 mqttHolder.messageImg.setOnClickListener(showImage);
+
                 int photoArrayListItemNum = photoArrayList.size();
                 mqttHolder.messageImg.setTag(photoArrayListItemNum);
                 Log.d("TAG", "onBindViewHolderPHOTO: "+photoArrayListItemNum);
                 photoArrayList.add(new PhotoBean(decodeByte,arrayList.get(i).getClientID(), photoArrayListItemNum));
+
                 break;
         }
 
@@ -81,19 +83,19 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         //顯示傳送時間
         mqttHolder.msgPubTime.setText(arrayList.get(i).getTime());
 
-        mqttHolder.txMessage.setOnClickListener(new View.OnClickListener() {//開啟/收合該則訊息的資訊
-            @Override
-            public void onClick(View v) {
-                if(mqttHolder.msgInfoLayout.getVisibility() == View.GONE){
-                    mqttHolder.msgInfoLayout.setVisibility(View.VISIBLE);
-                    mqttHolder.txMessage.setBackground(context.getResources().getDrawable(R.drawable.edit_text_bg_gray));
-                }
-                else{
-                    mqttHolder.msgInfoLayout.setVisibility(View.GONE);
-                    mqttHolder.txMessage.setBackground(context.getResources().getDrawable(R.drawable.edit_text_bg));
-                }
-            }
-        });
+//        mqttHolder.txMessage.setOnClickListener(new View.OnClickListener() {//開啟/收合該則訊息的資訊
+//            @Override
+//            public void onClick(View v) {
+//                if(mqttHolder.msgInfoLayout.getVisibility() == View.GONE){
+//                    mqttHolder.msgInfoLayout.setVisibility(View.VISIBLE);
+//                    mqttHolder.txMessage.setBackground(context.getResources().getDrawable(R.drawable.edit_text_bg_gray));
+//                }
+//                else{
+//                    mqttHolder.msgInfoLayout.setVisibility(View.GONE);
+//                    mqttHolder.txMessage.setBackground(context.getResources().getDrawable(R.drawable.edit_text_bg));
+//                }
+//            }
+//        });
 
         mqttHolder.imgOtherUser.setOnClickListener(new View.OnClickListener() {//顯示該訊息傳送者的資訊(尚未開發)
             @Override
@@ -143,15 +145,18 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         }
     }
 
-    View.OnClickListener showImage = new View.OnClickListener() {
+    View.OnClickListener showImage = new View.OnClickListener() { //點擊圖片，intent跳進"顯示圖片的activity"
         @Override
         public void onClick(View v) {
             Intent photoPage = new Intent(context, PhotoActivity.class);
-            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList);
+            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList); //以此方法傳圖片的arraylist，可能導致太大而無法intent跳轉!!!
+
+            /////////之後要在這裡做"生成該圖片的索引index值"
             int item = (int) v.getTag();
             Log.d("TAG", "onClick: "+ item);
             photoPage.putExtra("PHOTO_SCREEN_ITEM_NUM", item);
             context.startActivity(photoPage);
+
         }
     };
 
