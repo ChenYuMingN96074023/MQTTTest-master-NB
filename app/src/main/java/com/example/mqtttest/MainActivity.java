@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         imgIntent.setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(imgIntent, INTENT_GET_IMAGE);
     }
-
+//123
     // activity for result
 
     @Override
