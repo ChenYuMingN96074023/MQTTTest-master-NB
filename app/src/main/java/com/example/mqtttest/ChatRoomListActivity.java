@@ -1,10 +1,8 @@
 package com.example.mqtttest;
 
-import android.app.ActivityManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -12,10 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -40,6 +39,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
     private DBHelper_CRL dbHelper_CRL = null;
     private DBHelper_ChatMessages dbHelper_chatMessages = null;
     private static final String DB_CRItem_NAME = "myDatabase.db";
+    private static final String TAG = ChatRoomListActivity.class.getSimpleName();
     private static final int DB_CRItem_VERSION = 1;
     //以下為測試連線
     private MqttHelper mqttHelper;
@@ -52,7 +52,8 @@ public class ChatRoomListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_room_list);
         findViewById();
-        //以下為測試SQL用
+
+        //以下開啟SQLite，讀取列表，顯示於畫面上
         dbHelper_CRL = new DBHelper_CRL(this, DB_CRItem_NAME,null, DB_CRItem_VERSION);
         chatRoomListRv.setLayoutManager(new LinearLayoutManager(ChatRoomListActivity.this));
         arrayListCRList = dbHelper_CRL.getRecSet();
@@ -72,6 +73,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
 
         if(myClientID != null){
             mqttHelper = new MqttHelper(this, myClientID, chatRoomListRv);
+            mqttHelper.subscribeIndividual();
         }
     }
 
@@ -109,39 +111,27 @@ public class ChatRoomListActivity extends AppCompatActivity {
         }
     }
 
-    public void addCRok(View view) {//按鈕 "確定" ，新增聊天室
+    public void addCRok(View view) {//按鈕 "確定" ，新增聊天室 //功能已暫時被取代
         TextInputEditText et_add_CR = findViewById(R.id.et_add_CR);
+        String topic = et_add_CR.getText().toString();
 
-        try{
-            String topic = et_add_CR.getText().toString();
-            //以下為Subscribe，並建立SQLite，並發布消息
-            dbHelper_chatMessages = new DBHelper_ChatMessages(this, null, topic, null, 1);/////思考該建立在哪
-            dbHelper_chatMessages.createTable(topic);
-            dbHelper_chatMessages.close();
-            dbHelper_chatMessages = null;
-            mqttHelper.startSubscribe(topic);
-            mqttHelper.startPublish(topic, myClientID + "已加入聊天室", 1);
-            //以下為設定CRLItem
-            dbHelper_CRL.addRec(new CRListBean(topic, "null", "null", 3, 0));
-            arrayListCRList = dbHelper_CRL.getRecSet();
-            chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
-            //以下為設定畫面
-            et_add_CR.setText("");
-            addCRLayout.setVisibility(View.GONE);
-            btn_addCR.setText("+");
-        }catch (Exception e){
-            Toast.makeText(ChatRoomListActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        addChatroom(1, topic);
+        //以下為設定畫面
+        et_add_CR.setText("");
+        addCRLayout.setVisibility(View.GONE);
+        btn_addCR.setText("+");
+
     }
 
     public void add_chat_room_btn(View view){//按鈕 "+-"
-        if (addCRLayout.getVisibility() == View.GONE) {
-            addCRLayout.setVisibility(View.VISIBLE);
-            btn_addCR.setText("-");
-        }else {
-            addCRLayout.setVisibility(View.GONE);
-            btn_addCR.setText("+");
-        }
+//        if (addCRLayout.getVisibility() == View.GONE) {
+//            addCRLayout.setVisibility(View.VISIBLE);
+//            btn_addCR.setText("-");
+//        }else {
+//            addCRLayout.setVisibility(View.GONE);
+//            btn_addCR.setText("+");
+//        }
+        addChatroomAlertdialog_chooseIndOrGrp();
     }
 
     public void logout_btn(View view){//登出按鈕的layout
@@ -180,6 +170,69 @@ public class ChatRoomListActivity extends AppCompatActivity {
         ChatRoomListActivity.this.finish();//關閉activity
 
         //////之後要做刪除Database!!
+    }
+
+    private void addChatroomAlertdialog_chooseIndOrGrp(){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(ChatRoomListActivity.this);
+        dialog.setTitle("建立");
+        dialog.setMessage("您想建立何種聊天室?");
+        dialog.setNegativeButton("個人私訊",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                addChatroomAlertdialog_editCRTitle(0);
+            }
+
+        });
+        dialog.setPositiveButton("群組",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                addChatroomAlertdialog_editCRTitle(1);
+            }
+
+        });
+        dialog.setNeutralButton("取消",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                //不做任何動作
+            }
+
+        });
+        dialog.show();
+    }
+    private void addChatroomAlertdialog_editCRTitle(int indOrGrp){
+
+        LayoutInflater inflater = LayoutInflater.from(ChatRoomListActivity.this);
+        final View v = inflater.inflate(R.layout.add_chatroom_alertdialog_layout, null);
+        EditText editText = (EditText) (v.findViewById(R.id.editText_addCR));
+        new AlertDialog.Builder(ChatRoomListActivity.this)
+                .setTitle(indOrGrp==1?"請輸入想要新增的群組名稱":"請輸入想要私訊的對象")
+                .setView(v)
+                .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        addChatroom(indOrGrp, editText.getText().toString());
+                    }
+                })
+                .show();
+    }
+
+    public void addChatroom(int indOrGrp, String chatroomName){
+        try{
+            //以下為建立SQLite，並判斷是否需Sub
+            dbHelper_chatMessages = new DBHelper_ChatMessages(this, null, indOrGrp, chatroomName, null, 1);
+            dbHelper_chatMessages.createTable(chatroomName);
+            dbHelper_chatMessages.close();
+            dbHelper_chatMessages = null;
+            if(indOrGrp ==1){
+                mqttHelper.subscribeGroupTopic(chatroomName);
+            }
+            //以下為設定CRLItem，並更新畫面
+            dbHelper_CRL.addRec(new CRListBean(chatroomName, "null", "null", 3, 0, indOrGrp));
+            arrayListCRList = dbHelper_CRL.getRecSet();
+            chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
+        }catch (Exception e){
+            Toast.makeText(ChatRoomListActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

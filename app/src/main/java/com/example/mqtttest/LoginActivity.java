@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
                 "確認登入?");
         ad.setPositiveButton("是", new DialogInterface.OnClickListener() {//登入按鈕
             public void onClick(DialogInterface dialog, int i) {
-                if(EtAccount.length() != 0) { //在這裡設限制，若空白則不給登入//////////////////////
+                if(EtAccount.length() != 0) { //在這裡設限制，若空白則不給登入//////////////////////視需求可再加更多限制
                     login();
                 }else {
                     Toast.makeText(LoginActivity.this, "用戶名不可空白", Toast.LENGTH_SHORT).show();

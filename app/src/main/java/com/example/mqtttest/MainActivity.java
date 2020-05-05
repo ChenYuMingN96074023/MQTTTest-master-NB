@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private DBHelper_ChatMessages dbHelper_chatMessages;
     private DBHelper_CRL dbHelper_crl;
     private ArrayList arrayList = new ArrayList<>();
+    private int indOrGrp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +56,24 @@ public class MainActivity extends AppCompatActivity {
         myClientId = preferences.getString("clientID", "");
 
         myTopic = getIntent().getStringExtra("MY_TOPIC");
+        indOrGrp = getIntent().getIntExtra("IND_OR_GRP", -1);
+//        Log.d(TAG, "indOrGrp="+indOrGrp);
+
         recyclerView_CR = findViewById(R.id.recyclerView_CR);
         editText = findViewById(R.id.editText);
 
+        //以下判斷為開發過渡期測試用，確認無誤後可刪除
         if (myClientId != null && myTopic != null) {
-            mqtt = new MqttHelper(this, myTopic, myClientId, recyclerView_CR);
+            mqtt = new MqttHelper(this, myTopic, indOrGrp, myClientId, recyclerView_CR);
         } else {
             Toast.makeText(MainActivity.this,"fail \n ID:"+ myClientId + "Topic:"+ myTopic,Toast.LENGTH_LONG).show();
         }
 
         dbHelper_crl = new DBHelper_CRL(MainActivity.this, null,null,1);
-        dbHelper_crl.setUnreadMsgNum(myTopic, 0);//設未讀訊息為0
+        dbHelper_crl.setUnreadMsgNum(myTopic, indOrGrp,0);//設未讀訊息為0
 
-        dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, myTopic,null,1);
+        //以下開啟SQLite，讀出訊息，並顯示於畫面上
+        dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, indOrGrp, myTopic,null,1);
         arrayList = dbHelper_chatMessages.getRecSet(myTopic);
         recyclerView_CR.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView_CR.scrollToPosition(arrayList.size()-1);
@@ -78,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         if(dbHelper_chatMessages==null){
-            dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, myTopic,null,1);
+            dbHelper_chatMessages = new DBHelper_ChatMessages(MainActivity.this,null, indOrGrp, myTopic,null,1);
         }
     }
 
@@ -100,18 +106,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void buttonPublisher(View view) {
-        mqtt.startPublish(myTopic, editText.getText().toString(), TEXT);
+    public void buttonPublisher(View view) { //發布消息按鈕
+        mqtt.publish(myTopic, indOrGrp, editText.getText().toString(), TEXT);
         editText.setText("");
     }
 
-    public void imgPublisher(View view) {
+    public void imgPublisher(View view) {   //畫面左方，傳圖片按鈕
         Intent imgIntent = new Intent();
         Log.d(TAG,"Photo0");
         imgIntent.setType("image/*").setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(imgIntent, INTENT_GET_IMAGE);
     }
-//123
+
     // activity for result
 
     @Override
@@ -131,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream);/////////////////
                             byte[] imageByte = byteArrayOutputStream.toByteArray();
                             String imgEncode = Base64.encodeToString(imageByte, Base64.DEFAULT);
-                            mqtt.startPublish(myTopic, imgEncode, PHOTO);
+                            mqtt.publish(myTopic, indOrGrp, imgEncode, PHOTO);
                             Log.d(TAG, "photo encode :" + imgEncode);
                         } catch (FileNotFoundException e) {
                             e.printStackTrace();
@@ -160,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-//            mqtt.startSubscribe();
+//            mqtt.subscribeGroupTopic();
             return true;
         }
 

@@ -17,13 +17,14 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
 //    private int DB_VERSION = 1;
     private String _TableName = "CRL_Item_Table";
     private String crT_CRItem = "CREATE TABLE IF NOT EXISTS " + _TableName +"( " +
-                                        "topic VARCHAR(50)not null," + //////這裡的50 20只是暫時亂設定的
+                                        "topic VARCHAR(50)not null,"+
                                         "time VARCHAR(20),"+
                                         "message VARCHAR,"+
                                         "img_id INTEGER,"+
                                         "unread_msg_num INTEGER,"+
-                                        "PRIMARY KEY (topic));";
-    public final int TOPIC = 0, TIME = 1, MESSAGE = 2, IMG_ID = 3, UNREAD_MSG_NUM = 4;//這些值在table中的欄位
+                                        "individual_or_group INTEGER,"+
+                                        "PRIMARY KEY (topic,individual_or_group));";//(topic,individual_or_group)為一組聯合primary key
+    public final int TOPIC = 0, TIME = 1, MESSAGE = 2, IMG_ID = 3, UNREAD_MSG_NUM = 4, INDIVIDUAL_OR_GROUP = 5;//這些值在table中的欄位
     public DBHelper_CRL(Context context, String DB_NAME, SQLiteDatabase.CursorFactory factory, int DB_VERSION){
 //        super(context,DB_NAME,factory,DB_VERSION);
         super(context,"myDatabase.db",null,1);
@@ -48,6 +49,7 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         rec.put("message", bean.getMessage());
         rec.put("img_id", bean.getImg_id());
         rec.put("unread_msg_num", bean.getUnread_msg_num());
+        rec.put("individual_or_group", bean.getIndividual_or_group());
         long rowID = db.insert(_TableName, null,rec);
         db.close();
         return rowID;
@@ -62,7 +64,7 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         if (recSet.moveToLast()) { //由後往前排列
             do {
                 recAry.add(new CRListBean(recSet.getString(TOPIC), recSet.getString(TIME),
-                        recSet.getString(MESSAGE), recSet.getInt(IMG_ID), recSet.getInt(UNREAD_MSG_NUM)));
+                        recSet.getString(MESSAGE), recSet.getInt(IMG_ID), recSet.getInt(UNREAD_MSG_NUM), recSet.getInt(INDIVIDUAL_OR_GROUP)));
             } while (recSet.moveToPrevious());
         }
         recSet.close();
@@ -79,13 +81,13 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         return recSet.getCount();
     }
 
-    public int deleteRec(String topic)//刪除一筆資料，回傳刪除的記錄數
+    public int deleteRec(String topic, int individualOrGroup)//刪除一筆資料，回傳刪除的記錄數
     {
         SQLiteDatabase db = getReadableDatabase();
         String sql = "SELECT*FROM " + _TableName;
         Cursor recSet = db.rawQuery(sql,null);
         if(recSet.getCount() != 0){
-            String whereClause = "topic='"+ topic + "'";
+            String whereClause = "topic='"+ topic + "' AND individual_or_group='"+ individualOrGroup +"'";
             int rowsAffect = db.delete(_TableName, whereClause, null);
             db.close();
             return rowsAffect;
@@ -114,22 +116,13 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         return columnCount;
     }
 
-    public int getUNREAD_MSG_NUM(String topic)//傳入聊天列表topic，回傳該聊天室的未讀訊息數
+    public int getUNREAD_MSG_NUM(String topic, int indOrGrp)//傳入聊天列表topic，回傳該聊天室的未讀訊息數
     {
         SQLiteDatabase db = getReadableDatabase();
-        String sql = "SELECT*FROM "+_TableName+" WHERE topic LIKE?";
-        String[] args = {"%" + topic + "%"};
+        String sql = "SELECT*FROM "+_TableName+" WHERE individual_or_group = ? AND topic LIKE?";
+        String[] args = {Integer.toString(indOrGrp), "%" + topic + "%"};
         Cursor recSet = db.rawQuery(sql, args);
-//        int columnCount = recSet.getColumnCount();
-//        String fidSet = null;
-//        if (recSet.getCount()!=0){
-//            while (recSet.moveToNext()){
-//                fidSet = "";
-//                for (int i=4;i<5;i++)
-//                    fidSet += recSet.getInt(i) + "\n";
-//            }
-//        }
-        int uMN = 87;
+        int uMN = 0;
         if (recSet.getCount() != 0){  /////搞不懂這些.getCount()跟.moveToNext()在幹嘛...
             while (recSet.moveToNext()){
             uMN = recSet.getInt(UNREAD_MSG_NUM);
@@ -140,11 +133,11 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         return uMN;
     }
 
-    public void setUnreadMsgNum(String topic, int unreadMsgNum){
+    public void setUnreadMsgNum(String topic, int IndOrGrp, int unreadMsgNum){
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("unread_msg_num", unreadMsgNum);
-        db.update(_TableName, values, "topic ='"+topic+"'",null);
+        db.update(_TableName, values, "topic ='"+topic+"' AND individual_or_group ='"+IndOrGrp+"'",null);
 //        Log.d(TAG, "set UnreadMsgNum success");
     }
 }

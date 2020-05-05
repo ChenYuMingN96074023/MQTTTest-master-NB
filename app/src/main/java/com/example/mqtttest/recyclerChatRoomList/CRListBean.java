@@ -1,18 +1,16 @@
 package com.example.mqtttest.recyclerChatRoomList;
 
 public class CRListBean {
-    private String topic;
-    private String time;
-    private String message;
-    private int img_id;
-    private int unread_msg_num;
+    private String topic, time, message;
+    private int img_id, unread_msg_num, individual_or_group;
 
-    public CRListBean(String topic, String time, String message, int img_id, int unread_msg_num){
+    public CRListBean(String topic, String time, String message, int img_id, int unread_msg_num, int individual_or_group){
         this.topic = topic;
         this.time = time;
         this.message = message;
         this.img_id = img_id;
         this.unread_msg_num = unread_msg_num;
+        this.individual_or_group = individual_or_group;
     }
 
     public String getTopic() {
@@ -55,4 +53,11 @@ public class CRListBean {
         this.unread_msg_num = unread_msg_num;
     }
 
+    public int getIndividual_or_group() {
+        return individual_or_group;
+    }
+
+    public void setIndividual_or_group(int individual_or_group) {
+        this.individual_or_group = individual_or_group;
+    }
 }

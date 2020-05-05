@@ -11,16 +11,15 @@ import com.example.mqtttest.recyclerChatRoom.MQTTBean;
 
 import java.util.ArrayList;
 
-public class DBHelper_ChatMessages extends SQLiteOpenHelper {
+public class DBHelper_ChatMessages_Individual extends SQLiteOpenHelper {
 
-    public static String DBName_Messages_Group = "chatMessages.db";
-    public static String DBName_Messages_Individual = "chatMessages_Ind.db";
+    private String DB_NAME = "chatMessages.db";
     private String tableName ;
-    private final String TAG = DBHelper_ChatMessages.class.getSimpleName();
+    private final String TAG = DBHelper_ChatMessages_Individual.class.getSimpleName();
 
-    public DBHelper_ChatMessages(Context context,String DBName, int IndOrGrp, String tableName,SQLiteDatabase.CursorFactory factory, int version) {
+    public DBHelper_ChatMessages_Individual(Context context, String name, String tableName, SQLiteDatabase.CursorFactory factory, int version) {
 //        super(context, name, factory, version);
-        super(context , (IndOrGrp==1?DBName_Messages_Group:DBName_Messages_Individual), null, 1);
+        super(context, "chatMessagesIndividual.db", null, 1);
         this.tableName = tableName;
     }
 

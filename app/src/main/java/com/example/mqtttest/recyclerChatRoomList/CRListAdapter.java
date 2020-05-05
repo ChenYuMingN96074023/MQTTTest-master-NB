@@ -2,6 +2,7 @@ package com.example.mqtttest.recyclerChatRoomList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -48,6 +49,10 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
         myViewHolder.time.setText(arrayList.get(i).getTime());
         myViewHolder.message.setText(arrayList.get(i).getMessage());
         myViewHolder.unread_msg_num.setText(Integer.toString(arrayList.get(i).getUnread_msg_num()));
+        if (arrayList.get(i).getIndividual_or_group()==0) {/////////在此暫時簡單區分個人私訊與群組
+            int colorSeed = setImgColor(arrayList.get(i).getTopic());
+            myViewHolder.icon.setBackgroundColor(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
+        }
 
         //以下設定未讀訊息時的呈現
         if(arrayList.get(i).getUnread_msg_num() > 0){
@@ -65,6 +70,7 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
             public void onClick(View v) {
                 Intent to_cr_intent = new Intent(context, MainActivity.class);
                 to_cr_intent.putExtra("MY_TOPIC",arrayList.get(i).getTopic());
+                to_cr_intent.putExtra("IND_OR_GRP", arrayList.get(i).getIndividual_or_group());
 
                 context.startActivity(to_cr_intent);
 
@@ -100,5 +106,13 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
         }
     }
 
+    private int setImgColor(String clientID){ //藉由產生一數，改變android小人圖片的顏色
+        char[] chars = clientID.toCharArray();
+        int seed = 0;
+        for (int i = 0; i < chars.length; i++) {
+            seed = seed + (int) chars[i];
+        }
+        return seed;
+    }
 
 }
