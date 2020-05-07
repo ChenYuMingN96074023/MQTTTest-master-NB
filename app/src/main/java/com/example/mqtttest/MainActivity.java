@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         myTopic = getIntent().getStringExtra("MY_TOPIC");
         indOrGrp = getIntent().getIntExtra("IND_OR_GRP", -1);
+        toolbar.setSubtitle(myTopic);
 //        Log.d(TAG, "indOrGrp="+indOrGrp);
 
         recyclerView_CR = findViewById(R.id.recyclerView_CR);
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         arrayList = dbHelper_chatMessages.getRecSet(myTopic);
         recyclerView_CR.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         recyclerView_CR.scrollToPosition(arrayList.size()-1);
-        recyclerView_CR.setAdapter(new MQTTAdapter(MainActivity.this,arrayList,myClientId));
+        recyclerView_CR.setAdapter(new MQTTAdapter(MainActivity.this,arrayList,myTopic,indOrGrp,myClientId));
     }
 
     @Override

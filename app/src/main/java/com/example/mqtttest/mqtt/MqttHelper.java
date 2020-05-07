@@ -232,7 +232,7 @@ public class MqttHelper {
         }else if (addDataTopic.equals(myTopic) && addDataIOrG == indOrGrp){    //在聊天室中，傳入訊息topic跟所在聊天室topic相同
             arrayList = dbHelper_chatMessages.getRecSet(myTopic);
             layoutManager.scrollToPosition(arrayList.size()-1);
-            recyclerView.setAdapter(new MQTTAdapter(context, arrayList, myClientId));
+            recyclerView.setAdapter(new MQTTAdapter(context, arrayList, myTopic, indOrGrp, myClientId));
         }else {                                     //在聊天室中，傳入訊息topic跟所在聊天室topic不相同
             Toast toast = Toast.makeText(context, addDataTopic + "中有新訊息:" + data.getMessage(), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 0);

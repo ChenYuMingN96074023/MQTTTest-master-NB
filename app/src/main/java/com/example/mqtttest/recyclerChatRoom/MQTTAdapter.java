@@ -1,6 +1,7 @@
 package com.example.mqtttest.recyclerChatRoom;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
 import android.util.Log;
@@ -20,9 +22,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mqtttest.ChatRoomListActivity;
 import com.example.mqtttest.MainActivity;
 import com.example.mqtttest.PhotoActivity;
 import com.example.mqtttest.R;
+import com.example.mqtttest.database.DBHelper_CRL;
+import com.example.mqtttest.database.DBHelper_ChatMessages;
+import com.example.mqtttest.recyclerChatRoomList.CRListBean;
 import com.example.mqtttest.recyclerPhoto.PhotoBean;
 
 import java.text.SimpleDateFormat;
@@ -37,10 +43,16 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
     String myClientId;
 
     ArrayList<PhotoBean> photoArrayList = new ArrayList<>();
+    private DBHelper_ChatMessages dbHelper_chatMessages = null;
+    private DBHelper_CRL dbHelper_crl = null;
+    private String topic;
+    private int intOrGrp;
 
-    public MQTTAdapter(Context context, ArrayList<MQTTBean> arrayList, String myClientId) {
+    public MQTTAdapter(Context context, ArrayList<MQTTBean> arrayList, String topic, int intOrGrp, String myClientId) {
         this.context = context;
         this.arrayList = arrayList;
+        this.topic = topic;
+        this.intOrGrp = intOrGrp;
         this.myClientId = myClientId;
     }
 
@@ -97,10 +109,12 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
 //            }
 //        });
 
-        mqttHolder.imgOtherUser.setOnClickListener(new View.OnClickListener() {//顯示該訊息傳送者的資訊(尚未開發)
+        mqttHolder.imgOtherUser.setOnClickListener(new View.OnClickListener() {//目前為一鍵私訊功能
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "預計要顯示這個使用者的資訊，不過功能還沒實作>.<|||", Toast.LENGTH_SHORT).show();
+                if(intOrGrp==1){
+                    addChatroomAlertdialog(arrayList.get(i).clientID);
+                }
             }
         });
 
@@ -149,7 +163,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         @Override
         public void onClick(View v) {
             Intent photoPage = new Intent(context, PhotoActivity.class);
-            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList); //以此方法傳圖片的arraylist，可能導致太大而無法intent跳轉!!!
+            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList); //////以此方法傳圖片的arraylist，可能導致太大而無法intent跳轉!!!
 
             /////////之後要在這裡做"生成該圖片的索引index值"
             int item = (int) v.getTag();
@@ -167,6 +181,41 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
             seed = seed + (int) chars[i];
         }
         return seed;
+    }
+
+    private void addChatroomAlertdialog(String communicator){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setTitle("建立");
+        dialog.setMessage("您想與"+communicator+"建立聊天室?");
+        dialog.setPositiveButton("是",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                addChatroom(communicator);
+            }
+
+        });
+        dialog.setNeutralButton("取消",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                //不做任何動作
+            }
+
+        });
+        dialog.show();
+    }
+
+    private void addChatroom(String chatroomName){
+        try {
+            //以下建立SQLite
+            dbHelper_chatMessages = new DBHelper_ChatMessages(context, null, 0, chatroomName, null, 1);
+            dbHelper_chatMessages.createTable(chatroomName);
+            dbHelper_chatMessages.close();
+            dbHelper_chatMessages = null;
+            dbHelper_crl = new DBHelper_CRL(context, null,null, 0);
+            dbHelper_crl.addRec(new CRListBean(chatroomName, "null", "null", 3, 0, 0));
+        }catch (Exception e){
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
