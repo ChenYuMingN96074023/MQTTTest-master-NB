@@ -77,17 +77,22 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
                 byte[] decodeByte = Base64.decode(arrayList.get(i).getMessage().getBytes(),Base64.DEFAULT);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(decodeByte,0,decodeByte.length);
                 mqttHolder.messageImg.setImageBitmap(bitmap);
-                mqttHolder.messageImg.setOnClickListener(showImage);
+//                mqttHolder.messageImg.setOnClickListener(showImage);//0//改在OnBind裡面
+                mqttHolder.messageImg.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent photoPage = new Intent(context, PhotoActivity.class);
 
-                int photoArrayListItemNum = photoArrayList.size();
-                mqttHolder.messageImg.setTag(photoArrayListItemNum);
-                Log.d("TAG", "onBindViewHolderPHOTO: "+photoArrayListItemNum);
-                photoArrayList.add(new PhotoBean(decodeByte,arrayList.get(i).getClientID(), photoArrayListItemNum));
-
+                        photoPage.putExtra("TOPIC",topic);
+                        photoPage.putExtra("IND_OR_GRP", intOrGrp);
+                        photoPage.putExtra("TIME", arrayList.get(i).getTime());
+                        context.startActivity(photoPage);
+                    }
+                });
                 break;
         }
 
-        //設定小人的顏色
+        //設定android小人的顏色
         int colorSeed = setImgColor(arrayList.get(i).clientID);
         mqttHolder.imgOtherUser.setColorFilter(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
         mqttHolder.imgUser.setColorFilter(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
@@ -159,20 +164,20 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         }
     }
 
-    View.OnClickListener showImage = new View.OnClickListener() { //點擊圖片，intent跳進"顯示圖片的activity"
-        @Override
-        public void onClick(View v) {
-            Intent photoPage = new Intent(context, PhotoActivity.class);
-            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList); //////以此方法傳圖片的arraylist，可能導致太大而無法intent跳轉!!!
-
-            /////////之後要在這裡做"生成該圖片的索引index值"
-            int item = (int) v.getTag();
-            Log.d("TAG", "onClick: "+ item);
-            photoPage.putExtra("PHOTO_SCREEN_ITEM_NUM", item);
-            context.startActivity(photoPage);
-
-        }
-    };
+//    View.OnClickListener showImage = new View.OnClickListener() { //點擊圖片，intent跳進"顯示圖片的activity"
+//        @Override
+//        public void onClick(View v) {
+//            Intent photoPage = new Intent(context, PhotoActivity.class);
+//            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList); //////以此方法傳圖片的arraylist，可能導致太大而無法intent跳轉!!!
+//
+//            /////////之後要在這裡做"生成該圖片的索引index值"
+//            int item = (int) v.getTag();
+//            Log.d("TAG", "onClick: "+ item);
+//            photoPage.putExtra("PHOTO_SCREEN_ITEM_NUM", item);
+//            context.startActivity(photoPage);
+//
+//        }
+//    };
 
     private int setImgColor(String clientID){ //藉由產生一數，改變android小人圖片的顏色
         char[] chars = clientID.toCharArray();
@@ -213,6 +218,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
             dbHelper_chatMessages = null;
             dbHelper_crl = new DBHelper_CRL(context, null,null, 0);
             dbHelper_crl.addRec(new CRListBean(chatroomName, "null", "null", 3, 0, 0));
+            Toast.makeText(context, "與"+chatroomName+"的聊天室建立成功", Toast.LENGTH_SHORT).show();
         }catch (Exception e){
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
         }

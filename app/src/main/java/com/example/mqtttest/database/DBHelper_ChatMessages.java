@@ -5,9 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Base64;
 import android.util.Log;
 
 import com.example.mqtttest.recyclerChatRoom.MQTTBean;
+import com.example.mqtttest.recyclerPhoto.PhotoBean;
 
 import java.util.ArrayList;
 
@@ -68,11 +70,48 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
         ArrayList<MQTTBean> recAry = new ArrayList<MQTTBean>();
         int columnCount = recSet.getColumnCount();
         while (recSet.moveToNext()){
-            recAry.add(new MQTTBean(recSet.getString(0), recSet.getString(1), recSet.getString(2), recSet.getInt(3)));//////這邊先寫死
+            recAry.add(new MQTTBean(recSet.getString(0), recSet.getString(1), recSet.getString(2), recSet.getInt(3)));
         }
         recSet.close();
         db.close();
         return recAry;
+    }
+
+    public ArrayList<PhotoBean> getPhotoRecSet(String tableName)//只讀取訊息中的圖片部分，存進PhotoBean形式的ArrayList
+    {
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "SELECT*FROM "+tableName+" WHERE type = ?";
+        String[] args = {"2"};
+        Cursor recSet = db.rawQuery(sql, args);
+        ArrayList<PhotoBean> recAry = new ArrayList<PhotoBean>();
+        int columnCount = recSet.getColumnCount();
+        while (recSet.moveToNext()){
+            byte[] decodeByte = Base64.decode(recSet.getString(0).getBytes(), Base64.DEFAULT);
+            recAry.add(new PhotoBean(decodeByte, recSet.getString(1), recSet.getPosition()));
+        }
+        recSet.close();
+        db.close();
+        return recAry;
+    }
+
+    public int getPhotoIndexByTime(String tableName, String msgTime){ //藉由發送時間辨別圖片，並回傳該圖片的index值
+        ///////////////////////////////////////////////////////////////此方法若同一秒內有多張圖片將產生錯誤
+        SQLiteDatabase db = getReadableDatabase();
+        String sql = "SELECT time FROM "+tableName+" WHERE type = ?";
+        String[] args = {"2"}; //2:photo
+        Cursor recSet = db.rawQuery(sql, args);
+        Log.d(TAG,"到這裡還正常!");
+        while (recSet.moveToNext()){
+            Log.d(TAG, "time = "+recSet.getString(0));
+            if (recSet.getString(0).equals(msgTime)){
+                int index = recSet.getPosition();
+                Log.d(TAG, "index值為"+index);//0//
+                return index;
+            }
+        }
+        //以下為default，程式值不該往下執行
+        Log.d(TAG,"getPhotoIndexByTime片段的程式錯誤");
+        return -1;
     }
 
     public void deleteTable(String tableName) {//刪除一個table
