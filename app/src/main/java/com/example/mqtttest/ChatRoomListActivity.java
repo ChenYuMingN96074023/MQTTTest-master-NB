@@ -73,7 +73,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
 
         if(myClientID != null){
             mqttHelper = new MqttHelper(this, myClientID, chatRoomListRv);
-            mqttHelper.subscribeIndividual();
+            mqttHelper.subscribeIndividual();//寫在此的話會重複訂閱相同主題，不過無妨
         }
     }
 
@@ -88,11 +88,9 @@ public class ChatRoomListActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-        if(dbHelper_CRL ==null){
+        if(dbHelper_CRL == null){
             dbHelper_CRL = new DBHelper_CRL(this, DB_CRItem_NAME,null, DB_CRItem_VERSION);
         }
-
-        dbHelper_CRL = new DBHelper_CRL(this, DB_CRItem_NAME,null, DB_CRItem_VERSION);
 
         //更新聊天列表畫面
         arrayListCRList = dbHelper_CRL.getRecSet();
@@ -172,7 +170,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         //////之後要做刪除Database!!
     }
 
-    private void addChatroomAlertdialog_chooseIndOrGrp(){
+    private void addChatroomAlertdialog_chooseIndOrGrp(){ //跳Alertdialog詢問想建聊天室的種類
         AlertDialog.Builder dialog = new AlertDialog.Builder(ChatRoomListActivity.this);
         dialog.setTitle("建立");
         dialog.setMessage("您想建立何種聊天室?");
@@ -199,7 +197,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
         });
         dialog.show();
     }
-    private void addChatroomAlertdialog_editCRTitle(int indOrGrp){
+    private void addChatroomAlertdialog_editCRTitle(int indOrGrp){ //跳Alertdialog詢問想建聊天室的名稱
 
         LayoutInflater inflater = LayoutInflater.from(ChatRoomListActivity.this);
         final View v = inflater.inflate(R.layout.add_chatroom_alertdialog_layout, null);
@@ -216,7 +214,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
                 .show();
     }
 
-    public void addChatroom(int indOrGrp, String chatroomName){
+    public void addChatroom(int indOrGrp, String chatroomName){ //建立聊天室
         try{
             //以下為建立SQLite，並判斷是否需Sub
             dbHelper_chatMessages = new DBHelper_ChatMessages(this, null, indOrGrp, chatroomName, null, 1);
@@ -231,7 +229,7 @@ public class ChatRoomListActivity extends AppCompatActivity {
             arrayListCRList = dbHelper_CRL.getRecSet();
             chatRoomListRv.setAdapter(new CRListAdapter(ChatRoomListActivity.this, arrayListCRList));
         }catch (Exception e){
-            Toast.makeText(ChatRoomListActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(ChatRoomListActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();//若有錯誤則以toast顯示給使用者知道
         }
     }
 

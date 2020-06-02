@@ -37,7 +37,7 @@ public class PhotoActivity extends AppCompatActivity {
         ArrayList<PhotoBean> photoArrayList = dbHelper_chatMessages.getPhotoRecSet(topic);
         int itemIndex = dbHelper_chatMessages.getPhotoIndexByTime(topic, time);
 
-        // 以下用ArrayList顯示於畫面上(原始程式的"PhotoFunction.class"做的事)
+        // 以下用ArrayList顯示於畫面，並移至index的地方(原始程式的"PhotoFunction.class"做的事)
         RecyclerView recyclerView = findViewById(R.id.recyclerPhoto);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);

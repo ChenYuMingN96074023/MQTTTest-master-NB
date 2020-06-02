@@ -37,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void loginButton(View view){
+    public void loginButton(View view){ //點登入按鈕之後做的事
         AlertDialog.Builder ad=new AlertDialog.Builder(LoginActivity.this);
         ad.setTitle("登入");
         ad.setMessage("您將以" + EtAccount.getText().toString() + "登入聊天\n" +
@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         ad.show();//顯示對話框
 
     }
-    private void login(){
+    private void login(){ //登入時實際做的事
         Intent loginIntent = new Intent(LoginActivity.this, ChatRoomListActivity.class);
 
         SharedPreferences preferences = getSharedPreferences("testSharePreferences", MODE_PRIVATE);

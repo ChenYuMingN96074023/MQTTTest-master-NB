@@ -15,14 +15,14 @@ import java.util.ArrayList;
 
 public class DBHelper_ChatMessages extends SQLiteOpenHelper {
 
-    public static String DBName_Messages_Group = "chatMessages.db";
+    public static String DBName_Messages_Group = "chatMessages_Grp.db";
     public static String DBName_Messages_Individual = "chatMessages_Ind.db";
     private String tableName ;
     private final String TAG = DBHelper_ChatMessages.class.getSimpleName();
 
     public DBHelper_ChatMessages(Context context,String DBName, int IndOrGrp, String tableName,SQLiteDatabase.CursorFactory factory, int version) {
 //        super(context, name, factory, version);
-        super(context , (IndOrGrp==1?DBName_Messages_Group:DBName_Messages_Individual), null, 1);
+        super(context , (IndOrGrp==1?DBName_Messages_Group:DBName_Messages_Individual), null, 1);//依據變數individualOrGroup決定要開哪個.db檔
         this.tableName = tableName;
     }
 
@@ -41,8 +41,8 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         String crT_CRItem = "CREATE TABLE IF NOT EXISTS " + tableName +"( " +
                 "message VARCHAR ," +
-                "clientID VARCHAR(50),"+
-                "time VARCHAR," + //////這裡的50只是暫時亂設定的
+                "clientID VARCHAR(50),"+ //規定clientID最多50字元
+                "time VARCHAR," +
                 "type INTEGER);";
         db.execSQL(crT_CRItem);
         Log.d(TAG,"created table:" + tableName);
@@ -100,16 +100,15 @@ public class DBHelper_ChatMessages extends SQLiteOpenHelper {
         String sql = "SELECT time FROM "+tableName+" WHERE type = ?";
         String[] args = {"2"}; //2:photo
         Cursor recSet = db.rawQuery(sql, args);
-        Log.d(TAG,"到這裡還正常!");
         while (recSet.moveToNext()){
-            Log.d(TAG, "time = "+recSet.getString(0));
+//            Log.d(TAG, "time = "+recSet.getString(0));
             if (recSet.getString(0).equals(msgTime)){
                 int index = recSet.getPosition();
-                Log.d(TAG, "index值為"+index);//0//
+                Log.d(TAG, "index值為"+index);
                 return index;
             }
         }
-        //以下為default，程式值不該往下執行
+        //以下為default，程式不該往下執行
         Log.d(TAG,"getPhotoIndexByTime片段的程式錯誤");
         return -1;
     }

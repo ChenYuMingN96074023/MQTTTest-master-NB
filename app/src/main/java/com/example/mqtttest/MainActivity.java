@@ -52,18 +52,17 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //以下取得變數myClientId、myTopic、indOrGrp
         SharedPreferences preferences = getSharedPreferences("testSharePreferences", MODE_PRIVATE);
         myClientId = preferences.getString("clientID", "");
-
         myTopic = getIntent().getStringExtra("MY_TOPIC");
         indOrGrp = getIntent().getIntExtra("IND_OR_GRP", -1);
         toolbar.setSubtitle(myTopic);
-//        Log.d(TAG, "indOrGrp="+indOrGrp);
 
         recyclerView_CR = findViewById(R.id.recyclerView_CR);
         editText = findViewById(R.id.editText);
 
-        //以下判斷為開發過渡期測試用，確認無誤後可刪除
+        //以下確認myClientId與myTopic是否皆有植
         if (myClientId != null && myTopic != null) {
             mqtt = new MqttHelper(this, myTopic, indOrGrp, myClientId, recyclerView_CR);
         } else {
@@ -119,10 +118,8 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(imgIntent, INTENT_GET_IMAGE);
     }
 
-    // activity for result
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { // activity for result
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG,"Photo1");
         switch (requestCode) {

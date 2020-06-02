@@ -72,7 +72,6 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         return recAry;
     }
 
-
     public int RecCount()//傳回table所存的資料的筆數
     {
         SQLiteDatabase db = getWritableDatabase();
@@ -106,17 +105,7 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         db.close();
     }
 
-    public int searchTopic(String topic)//搜尋資料庫裡面是否有該topic的資料，有的話return所在的欄位數
-    {
-        SQLiteDatabase db = getReadableDatabase();
-        String sql = "SELECT*FROM " + _TableName + " WHERE topic LIKE ?";
-        String[] args = {"%" + topic + "%"};
-        Cursor recSet = db.rawQuery(sql, args);
-        int columnCount = recSet.getColumnCount();
-        return columnCount;
-    }
-
-    public int getUNREAD_MSG_NUM(String topic, int indOrGrp)//傳入聊天列表topic，回傳該聊天室的未讀訊息數
+    public int getUNREAD_MSG_NUM(String topic, int indOrGrp)//傳入聊天列表topic與indOrGrp，回傳該聊天室的未讀訊息數
     {
         SQLiteDatabase db = getReadableDatabase();
         String sql = "SELECT*FROM "+_TableName+" WHERE individual_or_group = ? AND topic LIKE?";
@@ -133,7 +122,8 @@ public class DBHelper_CRL extends SQLiteOpenHelper {
         return uMN;
     }
 
-    public void setUnreadMsgNum(String topic, int IndOrGrp, int unreadMsgNum){
+    public void setUnreadMsgNum(String topic, int IndOrGrp, int unreadMsgNum)//傳入聊天列表topic與indOrGrp，設定該聊天室的未讀訊息數
+    {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("unread_msg_num", unreadMsgNum);

@@ -6,13 +6,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +20,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.mqtttest.ChatRoomListActivity;
 import com.example.mqtttest.MainActivity;
 import com.example.mqtttest.PhotoActivity;
 import com.example.mqtttest.R;
@@ -31,10 +28,7 @@ import com.example.mqtttest.database.DBHelper_ChatMessages;
 import com.example.mqtttest.recyclerChatRoomList.CRListBean;
 import com.example.mqtttest.recyclerPhoto.PhotoBean;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
 
@@ -65,7 +59,6 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MQTTHolder mqttHolder, int i) {
-//        Log.d("TAG", "onBindViewHolder: "+i);
         switch (arrayList.get(i).type) { //訊息是圖片檔or文字
             case MainActivity.TEXT:
                 mqttHolder.txMessage.setText(arrayList.get(i).getMessage());
@@ -77,8 +70,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
                 byte[] decodeByte = Base64.decode(arrayList.get(i).getMessage().getBytes(),Base64.DEFAULT);
                 Bitmap bitmap = BitmapFactory.decodeByteArray(decodeByte,0,decodeByte.length);
                 mqttHolder.messageImg.setImageBitmap(bitmap);
-//                mqttHolder.messageImg.setOnClickListener(showImage);//0//改在OnBind裡面
-                mqttHolder.messageImg.setOnClickListener(new View.OnClickListener() {
+                mqttHolder.messageImg.setOnClickListener(new View.OnClickListener() { //點擊圖片，進入PhotoActivity
                     @Override
                     public void onClick(View v) {
                         Intent photoPage = new Intent(context, PhotoActivity.class);
@@ -93,7 +85,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         }
 
         //設定android小人的顏色
-        int colorSeed = setImgColor(arrayList.get(i).clientID);
+        int colorSeed = generateClientIDSeed(arrayList.get(i).clientID);
         mqttHolder.imgOtherUser.setColorFilter(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
         mqttHolder.imgUser.setColorFilter(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
 
@@ -117,7 +109,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         mqttHolder.imgOtherUser.setOnClickListener(new View.OnClickListener() {//目前為一鍵私訊功能
             @Override
             public void onClick(View v) {
-                if(intOrGrp==1){
+                if(intOrGrp==1){//在群組裡才有新增私訊聊天室的必要
                     addChatroomAlertdialog(arrayList.get(i).clientID);
                 }
             }
@@ -164,22 +156,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         }
     }
 
-//    View.OnClickListener showImage = new View.OnClickListener() { //點擊圖片，intent跳進"顯示圖片的activity"
-//        @Override
-//        public void onClick(View v) {
-//            Intent photoPage = new Intent(context, PhotoActivity.class);
-//            photoPage.putExtra("PHOTO_ARRAY_LIST", photoArrayList); //////以此方法傳圖片的arraylist，可能導致太大而無法intent跳轉!!!
-//
-//            /////////之後要在這裡做"生成該圖片的索引index值"
-//            int item = (int) v.getTag();
-//            Log.d("TAG", "onClick: "+ item);
-//            photoPage.putExtra("PHOTO_SCREEN_ITEM_NUM", item);
-//            context.startActivity(photoPage);
-//
-//        }
-//    };
-
-    private int setImgColor(String clientID){ //藉由產生一數，改變android小人圖片的顏色
+    private int generateClientIDSeed(String clientID){ //藉由clientID的ascii值，產生一數(用以改變android小人圖片的顏色)
         char[] chars = clientID.toCharArray();
         int seed = 0;
         for (int i = 0; i < chars.length; i++) {
@@ -188,7 +165,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         return seed;
     }
 
-    private void addChatroomAlertdialog(String communicator){
+    private void addChatroomAlertdialog(String communicator){ //跳Alertdialog詢問使用者是否要與該communicator建立私訊聊天
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
         dialog.setTitle("建立");
         dialog.setMessage("您想與"+communicator+"建立聊天室?");
@@ -209,7 +186,7 @@ public class MQTTAdapter extends RecyclerView.Adapter<MQTTAdapter.MQTTHolder> {
         dialog.show();
     }
 
-    private void addChatroom(String chatroomName){
+    private void addChatroom(String chatroomName){//與該communicator建立私訊聊天
         try {
             //以下建立SQLite
             dbHelper_chatMessages = new DBHelper_ChatMessages(context, null, 0, chatroomName, null, 1);

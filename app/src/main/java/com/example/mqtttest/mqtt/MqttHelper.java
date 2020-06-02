@@ -74,7 +74,7 @@ public class MqttHelper {
         connectMQTTServer();
     }
 
-    private void connectMQTTServer() {
+    private void connectMQTTServer() { //連server，連線時的設定寫於此function
         try {
             client = new MqttClient(mqttHost, myClientId, new MemoryPersistence());
             options = new MqttConnectOptions();
@@ -87,7 +87,7 @@ public class MqttHelper {
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
-                    Snackbar.make(recyclerView,cause.getMessage(),Snackbar.LENGTH_LONG).setAction("Action",null).show();
+//                    Snackbar.make(recyclerView,cause.getMessage(),Snackbar.LENGTH_LONG).setAction("Action",null).show();
                     Log.d(TAG, "connectionLost: " + cause.getMessage());
                 }
                 @Override
@@ -107,7 +107,7 @@ public class MqttHelper {
                 }
             });
             client.connect(options);
-            Snackbar.make(recyclerView,"Connect MQTT Server OK", Snackbar.LENGTH_SHORT).show();
+//            Snackbar.make(recyclerView,"Connect MQTT Server OK", Snackbar.LENGTH_SHORT).show();
         }
 
         catch (MqttException e) {
@@ -115,7 +115,7 @@ public class MqttHelper {
         }
     }
 
-    public void reconnectServerSnackbar(Exception e){
+    public void reconnectServerSnackbar(Exception e){  //在連不上server時，跳snackbar讓使用者重連線
         e.printStackTrace();
         Log.d("","MqttHelper: "+e.getMessage());
         Snackbar.make(recyclerView,e.getMessage(),Snackbar.LENGTH_INDEFINITE).setAction(R.string.click_to_reconnect, new View.OnClickListener() {
@@ -126,7 +126,7 @@ public class MqttHelper {
         }).show();
     }
 
-    public void subscribeIndividual(){
+    public void subscribeIndividual(){ //訂閱以自己clientID為名稱的topic
         try {
             int[] Qos = {1};
             String[] topic = {"individual/"+myClientId+"/#"};
@@ -136,7 +136,7 @@ public class MqttHelper {
         }
     }
 
-    public void subscribeGroupTopic(String subTopic){
+    public void subscribeGroupTopic(String subTopic){ //訂閱消息，根據群組主題訂閱topic
         try {
             int[] Qos = {1};
             String[] topic = {"group/" + subTopic};
@@ -147,7 +147,7 @@ public class MqttHelper {
         }
     }
 
-    public void publish(String pubTopic , int pubIndOrGrp, String message, int type){
+    public void publish(String pubTopic , int pubIndOrGrp, String message, int type){ //發布消息，依據pubTopic與pubIndOrGrp決定所要發到的topic，依據message與type決定消息內容
         try {
             MQTTBean data = null;
             switch (type) {
@@ -177,7 +177,7 @@ public class MqttHelper {
         }
     }
 
-    private void addData(String msgArriveTopic, String messagePayload){
+    private void addData(String msgArriveTopic, String messagePayload){ //訊息進入app後，實際處理、辨識、更新資料庫、刷新畫面等等工作的function
         layoutManager = new LinearLayoutManager(context);
         this.recyclerView.setLayoutManager(layoutManager);
         dbHelper_chatMessages = null;
@@ -186,7 +186,7 @@ public class MqttHelper {
         String addDataTopic = null;
         int addDataIOrG = -2;
 
-        //以下辨識傳入的topic是 群組 or 個人私訊///////////////////////
+        //以下辨識傳入的topic是 群組 or 個人私訊
         String topicLevel[] = msgArriveTopic.split("/"); //依照主題層級分隔符"/"，將收到的主題切割，存入String陣列topicLevel
         switch (topicLevel[0]){
             case "individual":
@@ -207,10 +207,9 @@ public class MqttHelper {
 
             default:
                 Log.d(TAG, "偵測到不合法信息!此訊息可能不是從app發送!");
-
         }
 
-        //以下判定是否符合json格式
+        //以下判定是否符合Gson格式
         try { //如果符合格式(是由這個架構發出的訊息)
             data = new Gson().fromJson(messagePayload, MQTTBean.class);
         } catch (Exception e){//如果不符合格式
@@ -225,22 +224,22 @@ public class MqttHelper {
         dbHelper_CRL.deleteRec(addDataTopic,addDataIOrG);
         dbHelper_CRL.addRec(new CRListBean(addDataTopic, timeGenerateHelper.formatTheTime(data.getTime()), data.getMessage(), 1, unreadMsgNum+1, addDataIOrG));
 
-        //以下判斷所在的activity為聊天室或列表，並做出對應的更新畫面(此為權宜之計)
-        if(myTopic == null && indOrGrp == -1){                         //在CRL activity
+        //以下判斷所在的activity為聊天室或列表，並做出對應的更新畫面(此為權宜之計)///
+        if(myTopic == null && indOrGrp == -1){                                 //在CRL activity
             arrayList_CRLItem = dbHelper_CRL.getRecSet();
             recyclerView.setAdapter(new CRListAdapter(context, arrayList_CRLItem));
         }else if (addDataTopic.equals(myTopic) && addDataIOrG == indOrGrp){    //在聊天室中，傳入訊息topic跟所在聊天室topic相同
             arrayList = dbHelper_chatMessages.getRecSet(myTopic);
             layoutManager.scrollToPosition(arrayList.size()-1);
             recyclerView.setAdapter(new MQTTAdapter(context, arrayList, myTopic, indOrGrp, myClientId));
-        }else {                                     //在聊天室中，傳入訊息topic跟所在聊天室topic不相同
+        }else {                                                                //在聊天室中，傳入訊息topic跟所在聊天室topic不相同
             Toast toast = Toast.makeText(context, addDataTopic + "中有新訊息:" + data.getMessage(), Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.TOP, 0, 0);
             toast.show();
         }
     }
 
-    public void connectToCleanSession(){
+    public void connectToCleanSession(){ //藉由設定cleanSession為true後連線，刪除server端儲存的該client的訊息
         try {
             client = new MqttClient(mqttHost, myClientId, new MemoryPersistence());
             options = new MqttConnectOptions();

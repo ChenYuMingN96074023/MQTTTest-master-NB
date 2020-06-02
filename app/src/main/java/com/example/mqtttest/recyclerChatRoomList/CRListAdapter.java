@@ -49,7 +49,7 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
         myViewHolder.time.setText(arrayList.get(i).getTime());
         myViewHolder.message.setText(arrayList.get(i).getMessage());
         myViewHolder.unread_msg_num.setText(Integer.toString(arrayList.get(i).getUnread_msg_num()));
-        if (arrayList.get(i).getIndividual_or_group()==0) {/////////在此暫時簡單區分個人私訊與群組
+        if (arrayList.get(i).getIndividual_or_group()==0) {//如果該聊天室是私訊聊天室，把顏色設成跟android小人一樣
             int colorSeed = setImgColor(arrayList.get(i).getTopic());
             myViewHolder.icon.setBackgroundColor(Color.argb(255,(colorSeed%128*2),(colorSeed%51*5),(colorSeed%256)));
         }
@@ -77,7 +77,7 @@ public class CRListAdapter extends RecyclerView.Adapter<CRListAdapter.myViewHold
             }
         });
 
-        myViewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+        myViewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() { //長按一個列表時做的事
             @Override
             public boolean onLongClick(View v) {
                 Toast toast = Toast.makeText(context,"這是長按事件",Toast.LENGTH_SHORT);
